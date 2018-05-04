@@ -158,14 +158,6 @@
 </layers>
 <board>
 <plain>
-<wire x1="118.11" y1="0" x2="2.54" y2="0" width="0.2032" layer="20"/>
-<wire x1="2.54" y1="0" x2="0" y2="2.54" width="0.2032" layer="20" curve="-90"/>
-<wire x1="0" y1="2.54" x2="0" y2="109.22" width="0.2032" layer="20"/>
-<wire x1="0" y1="109.22" x2="2.54" y2="111.76" width="0.2032" layer="20" curve="-90"/>
-<wire x1="2.54" y1="111.76" x2="118.11" y2="111.76" width="0.2032" layer="20"/>
-<wire x1="118.11" y1="111.76" x2="120.65" y2="109.22" width="0.2032" layer="20" curve="-90"/>
-<wire x1="120.65" y1="109.22" x2="120.65" y2="2.54" width="0.2032" layer="20"/>
-<wire x1="120.65" y1="2.54" x2="118.11" y2="0" width="0.2032" layer="20" curve="-90"/>
 </plain>
 <libraries>
 <library name="simon_jumps">
@@ -256,6 +248,72 @@ Breakout</text>
 <hole x="10.16" y="17.78" drill="3.048"/>
 <hole x="10.16" y="-16.51" drill="3.048"/>
 <hole x="-8.89" y="-16.51" drill="3.048"/>
+</package>
+</packages>
+</library>
+<library name="SparkFun-Boards">
+<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
+This library contains footprints for SparkFun breakout boards, microcontrollers (Arduino, Particle, Teensy, etc.),  breadboards, non-RF modules, etc.
+&lt;br&gt;
+&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is &lt;b&gt; the end user's responsibility&lt;/b&gt; to ensure correctness and suitablity for a given componet or application. 
+&lt;br&gt;
+&lt;br&gt;If you enjoy using this library, please buy one of our products at &lt;a href=" www.sparkfun.com"&gt;SparkFun.com&lt;/a&gt;.
+&lt;br&gt;
+&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; Creative Commons ShareAlike 4.0 International - https://creativecommons.org/licenses/by-sa/4.0/ 
+&lt;br&gt;
+&lt;br&gt;
+You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+<package name="FLANGED_RED_ENCLOSURE-DIMENSION">
+<description>&lt;h3&gt;Big Red Enclosure PCB&lt;/h3&gt;
+&lt;p&gt;Basic dimension for board outline and mounting  holes&lt;/p&gt;
+&lt;p&gt;Specifications:
+&lt;ul&gt;&lt;li&gt;Pin count:0&lt;/li&gt;
+&lt;li&gt;Area:5.91x3.23 in&lt;/li&gt;
+&lt;/ul&gt;&lt;/p&gt;
+&lt;p&gt;Example device(s):
+&lt;ul&gt;&lt;li&gt;Big Red Box-PCB&lt;/li&gt;
+&lt;/ul&gt;&lt;/p&gt;</description>
+<hole x="-10.93" y="-35.91" drill="3.175"/>
+<hole x="11.07" y="-35.91" drill="3.175"/>
+<hole x="62.07" y="-35.91" drill="3.175"/>
+<hole x="-61.93" y="-35.91" drill="3.175"/>
+<hole x="-10.93" y="34.09" drill="3.175"/>
+<hole x="11.07" y="34.09" drill="3.175"/>
+<hole x="62.07" y="34.09" drill="3.175"/>
+<hole x="-61.93" y="34.09" drill="3.175"/>
+<wire x1="-65.93" y1="-38.91" x2="-62.93" y2="-41.91" width="0.2032" layer="20" curve="90"/>
+<wire x1="-62.93" y1="-41.91" x2="-8.93" y2="-41.91" width="0.2032" layer="20"/>
+<wire x1="-8.93" y1="-41.91" x2="-5.93" y2="-38.91" width="0.2032" layer="20" curve="90"/>
+<wire x1="6.07" y1="-38.91" x2="9.07" y2="-41.91" width="0.2032" layer="20" curve="90"/>
+<wire x1="9.07" y1="-41.91" x2="63.07" y2="-41.91" width="0.2032" layer="20"/>
+<wire x1="63.07" y1="-41.91" x2="66.07" y2="-38.91" width="0.2032" layer="20" curve="90"/>
+<wire x1="66.07" y1="-38.91" x2="71.07" y2="-33.91" width="0.2032" layer="20" curve="-90"/>
+<wire x1="71.07" y1="-33.91" x2="74.93" y2="-30.226" width="0.2032" layer="20" curve="90"/>
+<wire x1="74.93" y1="-30.226" x2="74.93" y2="28.448" width="0.2032" layer="20"/>
+<wire x1="74.93" y1="28.448" x2="71.07" y2="32.09" width="0.2032" layer="20" curve="90"/>
+<wire x1="71.07" y1="32.09" x2="66.07" y2="37.09" width="0.2032" layer="20" curve="-90"/>
+<wire x1="66.07" y1="37.09" x2="63.246" y2="39.878" width="0.2032" layer="20" curve="90"/>
+<wire x1="63.246" y1="39.878" x2="8.89" y2="39.878" width="0.2032" layer="20"/>
+<wire x1="8.89" y1="39.878" x2="6.07" y2="37.09" width="0.2032" layer="20" curve="90"/>
+<wire x1="-5.93" y1="37.09" x2="-8.89" y2="39.878" width="0.2032" layer="20" curve="90"/>
+<wire x1="-8.89" y1="39.878" x2="-62.992" y2="39.878" width="0.2032" layer="20"/>
+<wire x1="-62.992" y1="39.878" x2="-65.93" y2="37.09" width="0.2032" layer="20" curve="90"/>
+<wire x1="-65.93" y1="37.09" x2="-70.93" y2="32.09" width="0.2032" layer="20" curve="-90"/>
+<wire x1="-70.93" y1="32.09" x2="-74.93" y2="28.09" width="0.2032" layer="20" curve="90"/>
+<wire x1="-74.93" y1="28.09" x2="-74.93" y2="-29.91" width="0.2032" layer="20"/>
+<wire x1="-74.93" y1="-29.91" x2="-70.93" y2="-33.91" width="0.2032" layer="20" curve="90"/>
+<wire x1="-70.93" y1="-33.91" x2="-65.93" y2="-38.91" width="0.2032" layer="20" curve="-90"/>
+<wire x1="-5.93" y1="-38.91" x2="-0.93" y2="-33.91" width="0.2032" layer="20" curve="-90"/>
+<wire x1="-0.93" y1="-33.91" x2="1.07" y2="-33.91" width="0.2032" layer="20"/>
+<wire x1="1.07" y1="-33.91" x2="6.07" y2="-38.91" width="0.2032" layer="20" curve="-90"/>
+<wire x1="-5.93" y1="37.09" x2="-0.93" y2="32.09" width="0.2032" layer="20" curve="90"/>
+<wire x1="-0.93" y1="32.09" x2="1.07" y2="32.09" width="0.2032" layer="20"/>
+<wire x1="1.07" y1="32.09" x2="6.07" y2="37.09" width="0.2032" layer="20" curve="90"/>
+<text x="0" y="33.02" size="0.6096" layer="25" font="vector" ratio="20" align="bottom-center">&gt;NAME</text>
+<text x="0" y="-34.29" size="0.6096" layer="27" font="vector" ratio="20" align="top-center">&gt;VALUE</text>
 </package>
 </packages>
 </library>
@@ -461,10 +519,11 @@ These rules have been curated by SparkFuns DFM commitee. After doing much resear
 </pass>
 </autorouter>
 <elements>
-<element name="E$1" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="36.83" y="20.32"/>
-<element name="E$2" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="36.83" y="55.88"/>
-<element name="E$3" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="36.83" y="91.44"/>
-<element name="E$4" library="simon_jumps" package="SIMON_JUMPS_LIGHT_BREAKOUT" value="" x="95.25" y="91.44" rot="R90"/>
+<element name="E$1" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="52.07" y="40.64" rot="R90"/>
+<element name="E$2" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="16.51" y="40.64" rot="R90"/>
+<element name="E$3" library="simon_jumps" package="BEEFCAKE_RELAY" value="" x="87.63" y="40.64" rot="R90"/>
+<element name="E$4" library="simon_jumps" package="SIMON_JUMPS_LIGHT_BREAKOUT" value="" x="128.27" y="57.15" rot="R90"/>
+<element name="E$5" library="SparkFun-Boards" package="FLANGED_RED_ENCLOSURE-DIMENSION" value="" x="74.93" y="41.91"/>
 </elements>
 <signals>
 </signals>
