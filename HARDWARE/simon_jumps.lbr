@@ -434,6 +434,49 @@ Shield</text>
 <hole x="27.94" y="-44.45" drill="3.048"/>
 <hole x="-27.94" y="-44.45" drill="3.048"/>
 </package>
+<package name="NOISY_CRICKET">
+<wire x1="-15.24" y1="-12.7" x2="16.51" y2="-12.7" width="0.2032" layer="49"/>
+<wire x1="16.51" y1="-12.7" x2="16.51" y2="12.7" width="0.2032" layer="49"/>
+<wire x1="16.51" y1="12.7" x2="-15.24" y2="12.7" width="0.2032" layer="49"/>
+<wire x1="-15.24" y1="12.7" x2="-15.24" y2="-12.7" width="0.2032" layer="49"/>
+<text x="-12.7" y="11.43" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">2.4-5.5V</text>
+<text x="-12.7" y="-11.43" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">MONO</text>
+<text x="-12.7" y="-8.89" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">GND</text>
+<text x="-12.7" y="-6.35" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">LEFT
+OUT</text>
+<text x="-12.7" y="-3.81" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">RIGHT
+OUT</text>
+<text x="-12.7" y="-1.27" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">GND</text>
+<text x="-12.7" y="1.27" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">RIGHT
+IN</text>
+<text x="-12.7" y="3.81" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">LEFT
+IN</text>
+<text x="-12.7" y="6.35" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">GND</text>
+<text x="-12.7" y="8.89" size="0.8128" layer="49" font="vector" ratio="15" align="center-left">SWITCH
+OUT</text>
+<wire x1="-15.24" y1="-2.54" x2="-8.89" y2="-2.54" width="0.254" layer="49"/>
+<wire x1="-15.24" y1="5.08" x2="-8.89" y2="5.08" width="0.254" layer="49"/>
+<circle x="12.7" y="8.89" radius="1.83161875" width="0.254" layer="49"/>
+<circle x="12.7" y="-8.89" radius="1.83161875" width="0.254" layer="49"/>
+<wire x1="16.4846" y1="-4.5212" x2="17.6784" y2="-4.5212" width="0.254" layer="49"/>
+<wire x1="17.6784" y1="-4.5212" x2="17.6784" y2="4.4958" width="0.254" layer="49"/>
+<wire x1="17.6784" y1="4.4958" x2="16.51" y2="4.4958" width="0.254" layer="49"/>
+<wire x1="16.51" y1="4.4958" x2="16.51" y2="4.5466" width="0.254" layer="49"/>
+<wire x1="17.7038" y1="-3.4544" x2="24.7396" y2="-3.4544" width="0.254" layer="49"/>
+<wire x1="24.7396" y1="-3.4544" x2="24.7396" y2="2.9718" width="0.254" layer="49"/>
+<wire x1="24.7396" y1="2.9718" x2="24.7396" y2="3.5052" width="0.254" layer="49"/>
+<wire x1="24.7396" y1="3.5052" x2="17.7292" y2="3.5052" width="0.254" layer="49"/>
+<wire x1="17.7292" y1="3.5052" x2="17.7292" y2="3.5306" width="0.254" layer="49"/>
+<wire x1="24.7904" y1="-3.048" x2="36.7284" y2="-3.048" width="0.254" layer="49"/>
+<wire x1="36.7284" y1="-3.048" x2="36.7284" y2="2.9718" width="0.254" layer="49"/>
+<wire x1="36.7284" y1="2.9718" x2="24.7396" y2="2.9718" width="0.254" layer="49"/>
+<wire x1="-13.97" y1="11.43" x2="-13.97" y2="6.35" width="0.254" layer="49"/>
+<wire x1="-13.97" y1="3.81" x2="-13.97" y2="-1.27" width="0.254" layer="49"/>
+<wire x1="-13.97" y1="-3.81" x2="-13.97" y2="-11.43" width="0.254" layer="49"/>
+<text x="-6.35" y="2.54" size="1.778" layer="49">NOISY_CRICKET</text>
+<hole x="12.7" y="8.89" drill="3.048"/>
+<hole x="12.7" y="-8.89" drill="3.048"/>
+</package>
 </packages>
 <symbols>
 </symbols>
