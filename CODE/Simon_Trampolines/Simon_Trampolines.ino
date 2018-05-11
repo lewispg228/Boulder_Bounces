@@ -81,9 +81,10 @@ int MAX_seq_repeat = 2; // Max sequence repeat. Used to ensure variety in patter
 #define MODE_BEEGEES 2
 #define MODE_COMBO_BUTTON 3
 #define MODE_MUSICAL_INST 4
+#define MODE_WACK_A_MOLE 5
 
 // Game state variables
-byte gameMode = MODE_MEMORY; //By default, let's play the memory game
+byte gameMode = MODE_MUSICAL_INST; //By default, let's play musical instrument - aka free jump
 byte gameBoard[32]; //Contains the combination of buttons as we advance
 byte gameRound = 0; //Counts the number of succesful rounds the player has made it through
 boolean debug = true; // turn on/off debug for development
@@ -111,6 +112,8 @@ boolean real_time_mode_input = false; // if true, it will look for a specific po
 // Doing this, allows us to require that a trampoline be in the HIGH state for a certain
 // amount of time. This helps debounce and prevent false triggering.
 
+
+
 // 3/2/2016, initiating all of these to 0, so that you can start a round standing on one trampoline, or any combo.
 
 int HIGH_COUNTER_RED = 0;
@@ -126,6 +129,18 @@ int RED_seq_count = 0;
 int GREEN_seq_count = 0;
 int BLUE_seq_count = 0;
 int YELLOW_seq_count = 0;
+
+// ULTRA_SONIC RANGE FINDER SETUP STUFF
+#define trigPin 12
+#define echoPin 2
+#define echoPin2 3
+#define echoPin3 4
+#define echoPin4 8
+
+long duration, duration2, duration3, duration4;
+
+boolean arm1, arm2, arm3, arm4;
+int threshold_up = 1000;
 
 // EXT MIDI TRIG STUFF
 // This is used to trigger the Music Instrument Shield
@@ -158,23 +173,23 @@ void setup()
 {
   //Setup hardware inputs/outputs. These pins are defined in the hardware_versions header file
 
-  // DUNK TANK TRIGGER
-  pinMode(A3, OUTPUT);
-  digitalWrite(A3, HIGH);
-
   //Enable pull ups on inputs
-  pinMode(BUTTON_RED, INPUT_PULLUP);
-  pinMode(BUTTON_GREEN, INPUT_PULLUP);
-  pinMode(BUTTON_BLUE, INPUT_PULLUP);
-  pinMode(BUTTON_YELLOW, INPUT_PULLUP);
+//  pinMode(BUTTON_RED, INPUT_PULLUP);
+//  pinMode(BUTTON_GREEN, INPUT_PULLUP);
+//  pinMode(BUTTON_BLUE, INPUT_PULLUP);
+//  pinMode(BUTTON_YELLOW, INPUT_PULLUP);
 
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(LED_YELLOW, OUTPUT);
+//  pinMode(LED_RED, OUTPUT);
+//  pinMode(LED_GREEN, OUTPUT);
+//  pinMode(LED_BLUE, OUTPUT);
+//  pinMode(LED_YELLOW, OUTPUT);
 
-  pinMode(BUZZER1, OUTPUT);
-  pinMode(BUZZER2, OUTPUT);
+// ULTRA_SONIC RANGE FINDER SETUP STUFF
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(echoPin2, INPUT);
+  pinMode(echoPin3, INPUT);
+  pinMode(echoPin4, INPUT);  
 
   if(debug){
     Serial.begin(115200);
@@ -190,46 +205,46 @@ void setup()
     
     
   
-  //Mode checking
-
-  // Check to see if the lower right button is pressed
-  if (checkButton() == CHOICE_YELLOW) play_beegees();
-
-  // Check to see if upper right button is pressed
-  else if (checkButton() == CHOICE_GREEN)
-  {
-    gameMode = MODE_BATTLE; //Put game into battle mode
-
-    //Turn on the upper right (green) LED
-    setLEDs(CHOICE_GREEN);
-    toner(CHOICE_GREEN, 150);
-
-    setLEDs(CHOICE_RED | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
-
-    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
-    
-    if(debug) Serial.println("Battle Mode entered"); 
-
-    //Now do nothing. Battle mode will be serviced in the main routine
-  }
-
-  // Check to see if upper left button is pressed
-  else if (checkButton() == CHOICE_RED)
-  {
-    gameMode = MODE_COMBO_BUTTON; //Put game into combo button mode
-
-    //Turn on the RED LED
-    setLEDs(CHOICE_RED);
-    toner(CHOICE_RED, 150);
-
-    setLEDs(CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
-
-    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
-    
-    if(debug) Serial.println("Combo Button Mode entered"); 
-    
-    //Now do nothing. Combo button mode will be serviced in the main routine
-  }
+//  //Mode checking
+//
+//  // Check to see if the lower right button is pressed
+//  if (checkButton() == CHOICE_YELLOW) play_beegees();
+//
+//  // Check to see if upper right button is pressed
+//  else if (checkButton() == CHOICE_GREEN)
+//  {
+//    gameMode = MODE_BATTLE; //Put game into battle mode
+//
+//    //Turn on the upper right (green) LED
+//    setLEDs(CHOICE_GREEN);
+//    toner(CHOICE_GREEN, 150);
+//
+//    setLEDs(CHOICE_RED | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
+//
+//    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
+//    
+//    if(debug) Serial.println("Battle Mode entered"); 
+//
+//    //Now do nothing. Battle mode will be serviced in the main routine
+//  }
+//
+//  // Check to see if upper left button is pressed
+//  else if (checkButton() == CHOICE_RED)
+//  {
+//    gameMode = MODE_COMBO_BUTTON; //Put game into combo button mode
+//
+//    //Turn on the RED LED
+//    setLEDs(CHOICE_RED);
+//    toner(CHOICE_RED, 150);
+//
+//    setLEDs(CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
+//
+//    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
+//    
+//    if(debug) Serial.println("Combo Button Mode entered"); 
+//    
+//    //Now do nothing. Combo button mode will be serviced in the main routine
+//  }
   
   
   // midi setup
@@ -248,7 +263,10 @@ void setup()
     bank = 0x78;// drums 
   }
   
-  play_winner(); // After setup is complete, say hello to the world
+//  play_winner(); // After setup is complete, say hello to the world
+
+play_musical_inst();
+
 }
 
 void loop()
@@ -305,7 +323,7 @@ void loop()
     // Play memory game and handle result
     if (play_memory() == true){
       win_melody(); // midi sounds
-      play_winner(); // Player won, play winner tones
+//      play_winner(); // Player won, play winner tones
     }
     else 
       play_loser(); // Player lost, play loser tones
@@ -322,7 +340,7 @@ void loop()
   {
     // Play memory game in combo mode and handle result
     if (play_memory_combo() == true){
-      play_winner(); // Player won, play winner tones
+//      play_winner(); // Player won, play winner tones
       win_melody(); // midi sounds
     }
     else 
@@ -555,6 +573,7 @@ void play_musical_inst(void)
                                             // This allows us to press the next sound without releasing
                                             // the previous button.
                                             // This makes it more like a traditional keyboard.
+Serial.println(button, BIN);                                            
 
     if (button != CHOICE_NONE)
     { 
@@ -583,8 +602,10 @@ byte checkButton(void)
 // but the FLAG of that button must have been set to
 byte checkButton_trampoline(void)
 {
+  //ultra_sonic_test();
+  //digitalReadTrampoline_test();
   /////////////////RED
-  if ((digitalRead(BUTTON_RED) == 0) && (HIGH_COUNTER_RED > 100)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((digitalReadTrampoline(1) == 0) && (HIGH_COUNTER_RED > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
     //delay(500);
@@ -592,7 +613,7 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////GREEN
-  if ((digitalRead(BUTTON_GREEN) == 0) && (HIGH_COUNTER_GREEN > 100)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((digitalReadTrampoline(2) == 0) && (HIGH_COUNTER_GREEN > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
     //delay(500);
@@ -600,7 +621,7 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////BLUE
-  if ((digitalRead(BUTTON_BLUE) == 0) && (HIGH_COUNTER_BLUE > 100)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((digitalReadTrampoline(3) == 0) && (HIGH_COUNTER_BLUE > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
     //delay(100);
@@ -608,17 +629,17 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////YELLOW
-  if ((digitalRead(BUTTON_YELLOW) == 0) && (HIGH_COUNTER_YELLOW > 100)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((digitalReadTrampoline(4) == 0) && (HIGH_COUNTER_YELLOW > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_YELLOW = 0; // reset counter
     //delay(100);
     return(CHOICE_YELLOW);
   }
   
-  if((digitalRead(BUTTON_RED) == 1) && (HIGH_COUNTER_RED < 101)) HIGH_COUNTER_RED++;
-  if((digitalRead(BUTTON_GREEN) == 1) && (HIGH_COUNTER_GREEN < 101)) HIGH_COUNTER_GREEN++;
-  if((digitalRead(BUTTON_YELLOW) == 1) && (HIGH_COUNTER_YELLOW < 101)) HIGH_COUNTER_YELLOW++;
-  if((digitalRead(BUTTON_BLUE) == 1) && (HIGH_COUNTER_BLUE < 101)) HIGH_COUNTER_BLUE++;
+  if((digitalReadTrampoline(1) == 1) && (HIGH_COUNTER_RED < 11)) HIGH_COUNTER_RED++;
+  if((digitalReadTrampoline(2) == 1) && (HIGH_COUNTER_GREEN < 11)) HIGH_COUNTER_GREEN++;
+  if((digitalReadTrampoline(3) == 1) && (HIGH_COUNTER_YELLOW < 11)) HIGH_COUNTER_YELLOW++;
+  if((digitalReadTrampoline(4) == 1) && (HIGH_COUNTER_BLUE < 11)) HIGH_COUNTER_BLUE++;
   
   return(CHOICE_NONE); // If no button is pressed, return none
 }
@@ -630,7 +651,7 @@ byte checkButton_trampoline(void)
 // Yellow, lower right: 784Hz - 1.276ms - 0.638ms pulse
 void toner(byte which, int buzz_length_ms)
 {
-  setLEDs(which); //Turn on a given LED
+//  setLEDs(which); //Turn on a given LED
 
   //Play the sound associated with the given LED
   switch(which) 
@@ -641,7 +662,7 @@ void toner(byte which, int buzz_length_ms)
       talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
       noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
     }
-    buzz_sound(buzz_length_ms, 1136); 
+//    buzz_sound(buzz_length_ms, 1136); 
     break;
   case CHOICE_GREEN:
     if(midi){
@@ -649,7 +670,7 @@ void toner(byte which, int buzz_length_ms)
       talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
       noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group
     }
-    buzz_sound(buzz_length_ms, 568); 
+//    buzz_sound(buzz_length_ms, 568); 
     break;
   case CHOICE_BLUE:
     if(midi){
@@ -657,7 +678,7 @@ void toner(byte which, int buzz_length_ms)
       talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
       noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group
     }
-    buzz_sound(buzz_length_ms, 851); 
+//    buzz_sound(buzz_length_ms, 851); 
     break;
   case CHOICE_YELLOW:
     if(midi){
@@ -665,67 +686,13 @@ void toner(byte which, int buzz_length_ms)
       talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
       noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group
     }
-    buzz_sound(buzz_length_ms, 638); 
+//    buzz_sound(buzz_length_ms, 638); 
     break;
   }
 
   setLEDs(CHOICE_OFF); // Turn off all LEDs
 }
 
-// Toggle buzzer every buzz_delay_us, for a duration of buzz_length_ms.
-void buzz_sound(int buzz_length_ms, int buzz_delay_us)
-{
-  // Convert total play time from milliseconds to microseconds
-  long buzz_length_us = buzz_length_ms * (long)1000;
-
-  // Loop until the remaining play time is less than a single buzz_delay_us
-  while (buzz_length_us > (buzz_delay_us * 2))
-  {
-    buzz_length_us -= buzz_delay_us * 2; //Decrease the remaining play time
-
-    // Toggle the buzzer at various speeds
-    digitalWrite(BUZZER1, LOW);
-    digitalWrite(BUZZER2, HIGH);
-    delayMicroseconds(buzz_delay_us);
-
-    digitalWrite(BUZZER1, HIGH);
-    digitalWrite(BUZZER2, LOW);
-    delayMicroseconds(buzz_delay_us);
-  }
-}
-
-// Play the winner sound and lights
-void play_winner(void)
-{
-  setLEDs(CHOICE_GREEN | CHOICE_BLUE);
-  winner_sound();
-  setLEDs(CHOICE_RED | CHOICE_YELLOW);
-  winner_sound();
-  setLEDs(CHOICE_GREEN | CHOICE_BLUE);
-  winner_sound();
-  setLEDs(CHOICE_RED | CHOICE_YELLOW);
-  winner_sound();
-}
-
-// Play the winner sound
-// This is just a unique (annoying) sound we came up with, there is no magic to it
-void winner_sound(void)
-{
-  // Toggle the buzzer at various speeds
-  for (byte x = 250 ; x > 70 ; x--)
-  {
-    for (byte y = 0 ; y < 3 ; y++)
-    {
-      digitalWrite(BUZZER2, HIGH);
-      digitalWrite(BUZZER1, LOW);
-      delayMicroseconds(x);
-
-      digitalWrite(BUZZER2, LOW);
-      digitalWrite(BUZZER1, HIGH);
-      delayMicroseconds(x);
-    }
-  }
-}
 
 // Play the loser sound/lights
 void play_loser(void)
@@ -737,19 +704,19 @@ void play_loser(void)
   delay(100);
   noteOn(0, 50, 127); // High Tom
   noteOn(0, 72, 127); // whistle  
-  buzz_sound(255, 1500);
+//  buzz_sound(255, 1500);
   
   setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
   noteOn(0, 38, 127); // snaire
   delay(100);  
   noteOn(0, 45, 127); // Low Tom
-  buzz_sound(255, 1500);
+//  buzz_sound(255, 1500);
 
   setLEDs(CHOICE_RED | CHOICE_GREEN);
   noteOn(0, 38, 127); // snaire
   delay(100);  
   noteOn(0, 50, 127); // High Tom  
-  buzz_sound(255, 1500);
+//  buzz_sound(255, 1500);
 
   setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
   noteOn(0, 38, 127); // snaire
@@ -759,7 +726,7 @@ void play_loser(void)
   noteOn(0, 86, 127); // kick
   noteOn(0, 38, 127); // snaire
   noteOn(0, 58, 127); // clacker 
-  buzz_sound(255, 1500);
+//  buzz_sound(255, 1500);
   
 }
 

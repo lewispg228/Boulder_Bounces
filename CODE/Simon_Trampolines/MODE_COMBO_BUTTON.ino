@@ -150,7 +150,7 @@ void toner_combo(byte which, int buzz_length_ms)
 {
   setLEDs_combo(which); //Turn on a given LED
   
-  buzz_sound(buzz_length_ms, combo_buzz_notes[which]); 
+//  buzz_sound(buzz_length_ms, combo_buzz_notes[which]); 
   
   setLEDs_combo(CHOICE_OFF); // Turn off all LEDs
 }
