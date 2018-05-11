@@ -136,7 +136,7 @@ boolean midi = true; // turn on/off midi in toner fundtions
 SoftwareSerial mySerial(15, 14); // RX (not used), TX
 byte note = 72; //whistle
 byte bank = 0x78; //drums
-byte resetMIDI = 16; //Tied to VS1053 Reset line
+byte resetMIDI = 7; //Tied to VS1053 Reset line
 int notes[] = { // fun notes found in the drum bank. grouped in 4.
   65,66,67,68,
   //60,61,62,63, // 62 and 63 are sub sonic for most speakers, so changing them - PGL 3/2/2016
