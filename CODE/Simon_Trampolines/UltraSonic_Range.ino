@@ -11,7 +11,7 @@ Original code improvements to the Ping sketch sourced from Trollmaker.com
 Some code and wiring inspired by http://en.wikiversity.org/wiki/User:Dstaub/robotcar
 */
 
-long thresh_up = 900;
+long thresh_up = 1650;
 
 void ultra_sonic_test() {
 
@@ -71,5 +71,37 @@ void digitalReadTrampoline_test()
     Serial.print(digitalReadTrampoline(3));
     Serial.print(" \t");
     Serial.println(digitalReadTrampoline(4));
+}
+
+void read_T_distances()
+{
+  T_distance[0] = readDistance(echoPin);
+  T_distance[1] = readDistance(echoPin2);
+  T_distance[2] = readDistance(echoPin3);
+  T_distance[3] = readDistance(echoPin4);
+}
+
+void set_T_booleans()
+{
+  for(int i = 0 ; i < 4 ; i++)
+  {
+    if(T_distance[i] > thresh_up) T_boolean[i] = true;
+    else T_boolean[i] = false;
+  }
+}
+
+void print_data()
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+      Serial.print(T_distance[i]); 
+      Serial.print(" \t");
+    }
+    for(int i = 0 ; i < 4 ; i++)
+    {
+      Serial.print(T_boolean[i]); 
+      Serial.print(" \t");
+    }    
+    Serial.println();
 }
 

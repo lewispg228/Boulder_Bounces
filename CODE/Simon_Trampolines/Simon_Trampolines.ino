@@ -112,7 +112,8 @@ boolean real_time_mode_input = false; // if true, it will look for a specific po
 // Doing this, allows us to require that a trampoline be in the HIGH state for a certain
 // amount of time. This helps debounce and prevent false triggering.
 
-
+long T_distance[4] = {0,0,0,0};
+boolean T_boolean[4] = {0,0,0,0};
 
 // 3/2/2016, initiating all of these to 0, so that you can start a round standing on one trampoline, or any combo.
 
@@ -573,7 +574,7 @@ void play_musical_inst(void)
                                             // This allows us to press the next sound without releasing
                                             // the previous button.
                                             // This makes it more like a traditional keyboard.
-Serial.println(button, BIN);                                            
+//Serial.println(button, BIN);                                            
 
     if (button != CHOICE_NONE)
     { 
@@ -604,8 +605,11 @@ byte checkButton_trampoline(void)
 {
   //ultra_sonic_test();
   //digitalReadTrampoline_test();
+  read_T_distances();
+  set_T_booleans();
+  print_data();
   /////////////////RED
-  if ((digitalReadTrampoline(1) == 0) && (HIGH_COUNTER_RED > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
     //delay(500);
@@ -613,7 +617,7 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////GREEN
-  if ((digitalReadTrampoline(2) == 0) && (HIGH_COUNTER_GREEN > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((T_boolean[1] == 0) && (HIGH_COUNTER_GREEN > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
     //delay(500);
@@ -621,7 +625,7 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////BLUE
-  if ((digitalReadTrampoline(3) == 0) && (HIGH_COUNTER_BLUE > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((T_boolean[2] == 0) && (HIGH_COUNTER_BLUE > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
     //delay(100);
@@ -629,17 +633,17 @@ byte checkButton_trampoline(void)
   }
 
   /////////////////YELLOW
-  if ((digitalReadTrampoline(4) == 0) && (HIGH_COUNTER_YELLOW > 10)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+  if ((T_boolean[3] == 0) && (HIGH_COUNTER_YELLOW > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_YELLOW = 0; // reset counter
     //delay(100);
     return(CHOICE_YELLOW);
   }
   
-  if((digitalReadTrampoline(1) == 1) && (HIGH_COUNTER_RED < 11)) HIGH_COUNTER_RED++;
-  if((digitalReadTrampoline(2) == 1) && (HIGH_COUNTER_GREEN < 11)) HIGH_COUNTER_GREEN++;
-  if((digitalReadTrampoline(3) == 1) && (HIGH_COUNTER_YELLOW < 11)) HIGH_COUNTER_YELLOW++;
-  if((digitalReadTrampoline(4) == 1) && (HIGH_COUNTER_BLUE < 11)) HIGH_COUNTER_BLUE++;
+  if((T_boolean[0] == 1) && (HIGH_COUNTER_RED < 6)) HIGH_COUNTER_RED++;
+  if((T_boolean[1] == 1) && (HIGH_COUNTER_GREEN < 6)) HIGH_COUNTER_GREEN++;
+  if((T_boolean[2] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
+  if((T_boolean[3] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
   
   return(CHOICE_NONE); // If no button is pressed, return none
 }
