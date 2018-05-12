@@ -11,7 +11,7 @@ Original code improvements to the Ping sketch sourced from Trollmaker.com
 Some code and wiring inspired by http://en.wikiversity.org/wiki/User:Dstaub/robotcar
 */
 
-long thresh_up = 1650;
+long thresh_up = 1400;
 
 void ultra_sonic_test() {
 
@@ -43,6 +43,7 @@ void ultra_sonic_test() {
 
 long readDistance(int pin)
 {
+  delay(5);
   digitalWrite(trigPin, LOW);  
   delayMicroseconds(2); 
   digitalWrite(trigPin, HIGH);
@@ -86,6 +87,7 @@ void set_T_booleans()
   for(int i = 0 ; i < 4 ; i++)
   {
     if(T_distance[i] > thresh_up) T_boolean[i] = true;
+    //else if(T_distance[i] < 200) T_boolean[i] = true; // bad reading, probably still high
     else T_boolean[i] = false;
   }
 }
@@ -99,9 +101,19 @@ void print_data()
     }
     for(int i = 0 ; i < 4 ; i++)
     {
-      Serial.print(T_boolean[i]); 
+      if(T_boolean[i]) Serial.print(T_boolean[i]);
+      else Serial.print(" "); // visually, this is easy to see a space, than a "0"
       Serial.print(" \t");
     }    
+    Serial.print(HIGH_COUNTER_RED);
+    Serial.print(" \t");
+    Serial.print(HIGH_COUNTER_GREEN);
+    Serial.print(" \t");
+    Serial.print(HIGH_COUNTER_BLUE);
+    Serial.print(" \t");
+    Serial.print(HIGH_COUNTER_YELLOW);
+    Serial.print(" \t");
+    
     Serial.println();
 }
 

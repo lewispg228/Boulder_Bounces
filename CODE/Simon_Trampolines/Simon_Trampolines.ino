@@ -151,10 +151,10 @@ boolean midi = true; // turn on/off midi in toner fundtions
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(15, 14); // RX (not used), TX
 byte note = 72; //whistle
-byte bank = 0x78; //drums
+byte bank = 0x00; //GM
 byte resetMIDI = 7; //Tied to VS1053 Reset line
 int notes[] = { // fun notes found in the drum bank. grouped in 4.
-  65,66,67,68,
+  70,72,74,75,
   //60,61,62,63, // 62 and 63 are sub sonic for most speakers, so changing them - PGL 3/2/2016
   60,61,76,77,
   78,79,80,81,
@@ -261,12 +261,12 @@ void setup()
     delay(100);
   
     testmelody();
-    bank = 0x78;// drums 
+    //bank = 0x78;// drums 
   }
   
 //  play_winner(); // After setup is complete, say hello to the world
 
-play_musical_inst();
+while(1) play_musical_inst();
 
 }
 
@@ -574,11 +574,12 @@ void play_musical_inst(void)
                                             // This allows us to press the next sound without releasing
                                             // the previous button.
                                             // This makes it more like a traditional keyboard.
-//Serial.println(button, BIN);                                            
+//Serial.println(button, DEC);                                            
 
     if (button != CHOICE_NONE)
     { 
-      toner(button, 1); // Play the button the user just pressed
+      // don't need to call TONER() because midi notes are played during checkButton_trampoline()
+      // toner(button, 1); // Play the button the user just pressed
       
       //delay(10); // This helps with debouncing and accidental double taps
 
@@ -601,8 +602,10 @@ byte checkButton(void)
 
 // Returns a '1' bit in the position corresponding to CHOICE_RED, CHOICE_GREEN, etc.
 // but the FLAG of that button must have been set to
+
 byte checkButton_trampoline(void)
 {
+  start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
   //ultra_sonic_test();
   //digitalReadTrampoline_test();
   read_T_distances();
@@ -612,7 +615,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
-    //delay(500);
+    noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
     return(CHOICE_RED);
   }
 
@@ -620,7 +623,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[1] == 0) && (HIGH_COUNTER_GREEN > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
-    //delay(500);
+    noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group    
     return(CHOICE_GREEN);
   }
 
@@ -628,7 +631,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[2] == 0) && (HIGH_COUNTER_BLUE > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
-    //delay(100);
+    noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group    
     return(CHOICE_BLUE);
   }
 
@@ -636,14 +639,14 @@ byte checkButton_trampoline(void)
   if ((T_boolean[3] == 0) && (HIGH_COUNTER_YELLOW > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_YELLOW = 0; // reset counter
-    //delay(100);
+    noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group    
     return(CHOICE_YELLOW);
   }
   
   if((T_boolean[0] == 1) && (HIGH_COUNTER_RED < 6)) HIGH_COUNTER_RED++;
   if((T_boolean[1] == 1) && (HIGH_COUNTER_GREEN < 6)) HIGH_COUNTER_GREEN++;
-  if((T_boolean[2] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
-  if((T_boolean[3] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
+  if((T_boolean[2] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
+  if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
   
   return(CHOICE_NONE); // If no button is pressed, return none
 }
@@ -656,11 +659,12 @@ byte checkButton_trampoline(void)
 void toner(byte which, int buzz_length_ms)
 {
 //  setLEDs(which); //Turn on a given LED
-
+start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
   //Play the sound associated with the given LED
   switch(which) 
   {
   case CHOICE_RED:
+   // Serial.println("RED");
     if(midi){
       talkMIDI(0xB0, 0, bank); //Bank select drums
       talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
@@ -693,8 +697,8 @@ void toner(byte which, int buzz_length_ms)
 //    buzz_sound(buzz_length_ms, 638); 
     break;
   }
-
-  setLEDs(CHOICE_OFF); // Turn off all LEDs
+  //delay(100);
+//  setLEDs(CHOICE_OFF); // Turn off all LEDs
 }
 
 
