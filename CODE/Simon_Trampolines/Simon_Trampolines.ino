@@ -866,11 +866,6 @@ boolean check_mode_buttons()
   }
 }
 
-void set_mode(void)
-{
-
-}
-
 void mode_button_calibration()
 {
   Serial.println(analogRead(A7));
