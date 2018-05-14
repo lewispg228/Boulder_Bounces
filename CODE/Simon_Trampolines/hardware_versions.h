@@ -21,10 +21,10 @@
 
 #ifdef BOARD_REV_2_3_2011
   // LED pin definitions, these are Arduino pins, not ATmega pins
-  #define LED_RED     10
-  #define LED_GREEN   3
-  #define LED_BLUE    13
-  #define LED_YELLOW  5
+  #define LED_RED     A2
+  #define LED_BLUE    A3
+  #define LED_GREEN   A4
+  #define LED_YELLOW  A5
   
   // Button pin definitions
   #define BUTTON_RED    9

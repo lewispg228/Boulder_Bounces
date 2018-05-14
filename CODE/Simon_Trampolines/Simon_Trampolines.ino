@@ -83,6 +83,8 @@ int MAX_seq_repeat = 2; // Max sequence repeat. Used to ensure variety in patter
 #define MODE_MUSICAL_INST 4
 #define MODE_WACK_A_MOLE 5
 
+#define NUM_OF_TRAMPOLINES 3
+
 // Game state variables
 byte gameMode = MODE_MUSICAL_INST; //By default, let's play musical instrument - aka free jump
 byte gameBoard[32]; //Contains the combination of buttons as we advance
@@ -180,10 +182,10 @@ void setup()
 //  pinMode(BUTTON_BLUE, INPUT_PULLUP);
 //  pinMode(BUTTON_YELLOW, INPUT_PULLUP);
 
-//  pinMode(LED_RED, OUTPUT);
-//  pinMode(LED_GREEN, OUTPUT);
-//  pinMode(LED_BLUE, OUTPUT);
-//  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_YELLOW, OUTPUT);
 
 // ULTRA_SONIC RANGE FINDER SETUP STUFF
   pinMode(trigPin, OUTPUT);
@@ -266,7 +268,8 @@ void setup()
   
 //  play_winner(); // After setup is complete, say hello to the world
 
-while(1) play_musical_inst();
+//while(1) play_musical_inst();
+//while(1) light_test();
 
 }
 
@@ -746,21 +749,24 @@ void play_loser(void)
 // Show an "attract mode" display while waiting for user to press button.
 void attractMode(void)
 {
-  int counter = 0;
+  long counter = 0;
   //if(trampoline) attract_mode_speed *= 10;
+  long start_time = millis();
   while(1) 
   {
     if(Serial.available()) exe_serial_command();
     else{
       if(trampoline)
       {
-        if (checkButton_trampoline() != CHOICE_NONE) return;
-        if(counter == 0) setLEDs(CHOICE_RED);
-        else if(counter == 2000) setLEDs(CHOICE_BLUE);
-        else if(counter == 4000) setLEDs(CHOICE_GREEN);
-        else if(counter == 6000) setLEDs(CHOICE_YELLOW);
-        counter++;
-        if(counter == 8000) counter = 0; // reset
+        //if (checkButton_trampoline() != CHOICE_NONE) return;
+        checkButton_trampoline();
+        if((millis() - start_time) == 1000) setLEDs(CHOICE_RED);
+        else if((millis() - start_time) == 2000) setLEDs(CHOICE_BLUE);
+        else if((millis() - start_time) == 3000) 
+        {
+          setLEDs(CHOICE_GREEN);
+          start_time = millis(); // reset timer
+        }
       }
       else{
         setLEDs(CHOICE_RED);
@@ -783,4 +789,26 @@ void attractMode(void)
   }
 }
 
+void light_test(void)
+{
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+
+  
+  
+  digitalWrite(A2, HIGH);
+//  digitalWrite(A3, HIGH);
+//  digitalWrite(A4, HIGH);
+//  digitalWrite(A5, HIGH);
+  delay(1000);
+
+
+  digitalWrite(A2, LOW);
+  digitalWrite(A3, LOW);
+  digitalWrite(A4, LOW);
+  digitalWrite(A5, LOW);
+  delay(1000);
+}
 
