@@ -303,6 +303,7 @@ void loop()
 
   if (gameMode == MODE_MEMORY)
   {
+    Serial.println("--->>> Memory Mode");
     // Play memory game and handle result
     if (play_memory() == true){
       win_melody(); // midi sounds
@@ -332,6 +333,7 @@ void loop()
   
   if (gameMode == MODE_MUSICAL_INST)
   {
+    Serial.println("--->>> Free Jump Mode");
     play_musical_inst(); // Play musical inst until a timeout occurs (3 seconds)
   }
   
@@ -817,19 +819,21 @@ void set_mode(void)
     {
       gameMode = MODE_MEMORY;
       Serial.println("MEMORY");
-      
+      return;
     }
     
     if(mode_ADC_reading < (button_value[1] + 10))
     {
       gameMode = MODE_WACK_A_MOLE;
       Serial.println("WACK-A-MOLE");
+      return;
     }
     
     if(mode_ADC_reading < (button_value[2] + 10))
     {
       gameMode = MODE_MUSICAL_INST;
       Serial.println("FREE JUMP");
+      return;
     }
 }
 
