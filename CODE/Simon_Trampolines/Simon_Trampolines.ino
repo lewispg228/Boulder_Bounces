@@ -605,6 +605,7 @@ byte checkButton(void)
 
 byte checkButton_trampoline(void)
 {
+  byte CHOICE = CHOICE_NONE; // if nothing is pressed
   start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
   //ultra_sonic_test();
   //digitalReadTrampoline_test();
@@ -616,7 +617,8 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_RED = 0; // reset counter
     noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
-    return(CHOICE_RED);
+    CHOICE = CHOICE_RED;
+    //return(CHOICE_RED);
   }
 
   /////////////////GREEN
@@ -624,7 +626,8 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
     noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group    
-    return(CHOICE_GREEN);
+    CHOICE = CHOICE_GREEN;
+    //return(CHOICE_GREEN);
   }
 
   /////////////////BLUE
@@ -632,15 +635,17 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
     noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group    
-    return(CHOICE_BLUE);
+    CHOICE = CHOICE_BLUE;
+   // return(CHOICE_BLUE);
   }
 
   /////////////////YELLOW
   if ((T_boolean[3] == 0) && (HIGH_COUNTER_YELLOW > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_YELLOW = 0; // reset counter
-    noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group    
-    return(CHOICE_YELLOW);
+    noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group   
+    CHOICE = CHOICE_YELLOW; 
+    //return(CHOICE_YELLOW);
   }
   
   if((T_boolean[0] == 1) && (HIGH_COUNTER_RED < 6)) HIGH_COUNTER_RED++;
@@ -648,7 +653,7 @@ byte checkButton_trampoline(void)
   if((T_boolean[2] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
   if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
   
-  return(CHOICE_NONE); // If no button is pressed, return none
+  return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
 
 // Light an LED and play tone
