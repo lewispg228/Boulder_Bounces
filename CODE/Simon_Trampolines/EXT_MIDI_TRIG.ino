@@ -25,7 +25,7 @@ void talkMIDI(byte cmd, byte data1, byte data2) {
 //  digitalWrite(ledPin, LOW);
 }
 
-void testmelody(){
+void newGameMelody(){
   int notes[] = {70,72,74,75,77};
   bank = 0x00; //GM1
   for(int i=0;i<5;i++){
