@@ -286,6 +286,7 @@ void loop()
   YELLOW_seq_count = 0;
 
   // Indicate the start of game play
+  newGameMelody(); // indicate new game starting via melodic sound
   setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW); // Turn all LEDs on
   delay(1000);
   setLEDs(CHOICE_OFF); // Turn off LEDs
@@ -384,7 +385,6 @@ byte wait_for_button(byte currentMove = 0)
 // Returns 0 if player loses, or 1 if player wins
 boolean play_memory(void)
 {
-  newGameMelody(); // indicate new game starting via melodic sound
   randomSeed(millis()); // Seed the random generator with random amount of millis()
 
   gameRound = 0; // Reset the game to the beginning
@@ -562,9 +562,7 @@ void setLEDs(byte leds)
 
 void play_musical_inst(void)
 {
-  newGameMelody(); // indicate new game starting via melodic sound
-  
-  long startTime = millis(); // Remember the time we started the this loop
+   long startTime = millis(); // Remember the time we started the this loop
 
   while ( ((millis() - startTime) < ENTRY_TIME_LIMIT) && (gameMode == MODE_MUSICAL_INST)) // Loop until too much time has passed , or we switched modes, note, MODE can change every time we call readDistance() - which happens a ton all the time!!!
   {
