@@ -480,9 +480,9 @@ void add_to_moves(void)
       {
         // check to see if that button is already "maxed out" (aka it has been used twice already)
         if((newButton == 0) && (RED_seq_count == 2)); // do nothing
-        else if((newButton == 1) && (GREEN_seq_count == 2)); // do nothing
-        else if((newButton == 2) && (BLUE_seq_count == 2)); // do nothing
-        else if((newButton == 3) && (YELLOW_seq_count == 2)); // do nothing
+        else if((newButton == 1) && (GREEN_seq_count == 3)); // do nothing
+        else if((newButton == 2) && (BLUE_seq_count == 3)); // do nothing
+        //else if((newButton == 3) && (YELLOW_seq_count == 2)); // do nothing
         else break; // get out of this while loop and continue playing. This means that the new button is good to go. 
       }    
     }
@@ -653,7 +653,7 @@ byte checkButton_trampoline(void)
 // Yellow, lower right: 784Hz - 1.276ms - 0.638ms pulse
 void toner(byte which, int buzz_length_ms)
 {
-//  setLEDs(which); //Turn on a given LED
+  setLEDs(which); //Turn on a given LED
 start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
   //Play the sound associated with the given LED
   switch(which) 
@@ -692,8 +692,8 @@ start_note = 0; // reset to use the first 4 notes in the array - note won't chan
 //    buzz_sound(buzz_length_ms, 638); 
     break;
   }
-  //delay(100);
-//  setLEDs(CHOICE_OFF); // Turn off all LEDs
+  delay(100);
+  setLEDs(CHOICE_OFF); // Turn off all LEDs
 }
 
 
@@ -808,6 +808,7 @@ boolean check_mode_buttons()
   if(mode_ADC_reading > 1000) return false; // no button being pressed
   else
   {
+    Serial.println(mode_ADC_reading);
     set_mode();
     return true;
   }

@@ -41,7 +41,7 @@ void testmelody(){
 void win_melody(){
   
   // DUNK TANK TRIGGER
-  digitalWrite(A3, LOW); 
+  //digitalWrite(A3, LOW); 
   
   int notes[] = {70,0,70,70,70,0,72,0,70,0,72,0,74};
   bank = 0x00; //GM1
@@ -65,10 +65,10 @@ void win_melody(){
   noteOn(0, 38, 127); // snaire
   
   // DUNK TANK TRIGGER
-  delay(1000); // delay to ensure that the dunk tank recieves the low signal
-  digitalWrite(A3, HIGH);
+  //delay(1000); // delay to ensure that the dunk tank recieves the low signal
+  //digitalWrite(A3, HIGH);
   
-  bank = 0x78;// drums 
+  //bank = 0x78;// drums 
 }
 
 
