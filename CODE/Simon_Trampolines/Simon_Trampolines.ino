@@ -828,43 +828,47 @@ boolean check_mode_buttons()
   else
   {
     Serial.println(mode_ADC_reading);
-    set_mode();
-    return true;
+    // take some more readings and average them, to avoid false button presses.
+    // this requires that the button be held down a little more solidly
+    int total_readings = 0;
+    for (int i = 0 ; i < 10 ; i++)
+    {
+      total_readings += analogRead(A7);
+      delay(10);
+    }
+    mode_ADC_reading = (total_readings/10);
+    Serial.println(mode_ADC_reading);
+      if((mode_ADC_reading > (button_value[0] - 5)) && (mode_ADC_reading < (button_value[0] + 5)))
+      {
+        gameMode = MODE_MEMORY;
+        Serial.println("MEMORY");
+        return true;
+      }
+      
+      else if((mode_ADC_reading > (button_value[1] - 5)) && (mode_ADC_reading < (button_value[1] + 5)))
+      {
+        gameMode = MODE_WACK_A_MOLE;
+        Serial.println("WACK-A-MOLE");
+        return true;
+      }
+      
+      else if((mode_ADC_reading > (button_value[2] - 5)) && (mode_ADC_reading < (button_value[2] + 5)))
+      {
+        gameMode = MODE_MUSICAL_INST;
+        Serial.println("FREE JUMP");
+        return true;
+      }
+      else
+      {
+        Serial.println("BAD VALUE");
+        return false;
+      }
   }
 }
 
 void set_mode(void)
 {
-  // take some more readings and average them, to avoid false button presses.
-  // this requires that the button be held down a little more solidly
-  int total_readings = 0;
-  for (int i = 0 ; i < 10 ; i++)
-  {
-    total_readings += analogRead(A7);
-    delay(10);
-  }
-  mode_ADC_reading = (total_readings/10);
-  Serial.println(mode_ADC_reading);
-    if(mode_ADC_reading < (button_value[0] + 10))
-    {
-      gameMode = MODE_MEMORY;
-      Serial.println("MEMORY");
-      return;
-    }
-    
-    if(mode_ADC_reading < (button_value[1] + 10))
-    {
-      gameMode = MODE_WACK_A_MOLE;
-      Serial.println("WACK-A-MOLE");
-      return;
-    }
-    
-    if(mode_ADC_reading < (button_value[2] + 10))
-    {
-      gameMode = MODE_MUSICAL_INST;
-      Serial.println("FREE JUMP");
-      return;
-    }
+
 }
 
 void mode_button_calibration()
