@@ -140,6 +140,9 @@ int YELLOW_seq_count = 0;
 #define echoPin3 4
 #define echoPin4 8
 
+int mode_ADC_reading;
+int button_value[7] = {90, 168, 234, 290, 339, 381, 419};
+
 long duration, duration2, duration3, duration4;
 
 boolean arm1, arm2, arm3, arm4;
@@ -270,7 +273,7 @@ void setup()
 
 //while(1) play_musical_inst();
 //while(1) light_test();
-
+//while(1) mode_button_calibration();
 }
 
 void loop()
@@ -293,30 +296,6 @@ void loop()
   if(start_note < 16) start_note += 4;   // Note, you must adjust the "greater than number" when adding more groups.
   else start_note = 0; // reset
 
-  // Real_time_mode_input is a boolean variable above, only use this if you have input potentiometer on A5
-  if(real_time_mode_input){ // note, Combo mode not yet supported as of 6/6/2013
-                            // I didn't include this cause it would be really hard on trampolines.
-    
-    int input = analogRead(A5);
-    if(debug) Serial.print("input=");
-    if(debug) Serial.println(input);
-
-    if(input <= 1023) {
-      ROUNDS_TO_WIN = 8;
-      gameMode = MODE_MEMORY;
-    }
-    if(input < 800) {
-      ROUNDS_TO_WIN = 10;
-      gameMode = MODE_MEMORY;
-    }
-    if(input < 530) {
-      gameMode = MODE_MUSICAL_INST;
-    }
-    if(input < 250) {
-      gameMode = MODE_BATTLE;
-    }
-  }
-  
     if(debug) Serial.print("rounds to win=");
     if(debug) Serial.println(ROUNDS_TO_WIN);
     if(debug) Serial.print("gameMode=");
@@ -571,7 +550,7 @@ void play_musical_inst(void)
 {
   long startTime = millis(); // Remember the time we started the this loop
 
-  while ( (millis() - startTime) < ENTRY_TIME_LIMIT) // Loop until too much time has passed
+  while ( ((millis() - startTime) < ENTRY_TIME_LIMIT) && (gameMode == MODE_MUSICAL_INST)) // Loop until too much time has passed , or we switched modes, note, MODE can change every time we call readDistance() - which happens a ton all the time!!!
   {
     byte button = checkButton_trampoline(); // alwasy do trampoline, even if playing with buttons
                                             // This allows us to press the next sound without releasing
@@ -609,17 +588,19 @@ byte checkButton(void)
 byte checkButton_trampoline(void)
 {
   byte CHOICE = CHOICE_NONE; // if nothing is pressed
+  byte CHOICE_LEDS_COMBO = 0; // start with no LEDs on (if there is no jumping), then we will "and" them all in, so you can have multiples light up at the same time.
   start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
   //ultra_sonic_test();
   //digitalReadTrampoline_test();
   read_T_distances();
   set_T_booleans();
-  print_data();
+  //print_data();
   /////////////////RED
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
     noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
+    CHOICE_LEDS_COMBO |= CHOICE_RED;
     CHOICE = CHOICE_RED;
     //return(CHOICE_RED);
   }
@@ -629,6 +610,7 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
     noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group    
+    CHOICE_LEDS_COMBO |= CHOICE_GREEN;
     CHOICE = CHOICE_GREEN;
     //return(CHOICE_GREEN);
   }
@@ -638,6 +620,7 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
     noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group    
+    CHOICE_LEDS_COMBO |= CHOICE_BLUE;
     CHOICE = CHOICE_BLUE;
    // return(CHOICE_BLUE);
   }
@@ -647,6 +630,7 @@ byte checkButton_trampoline(void)
   {
     HIGH_COUNTER_YELLOW = 0; // reset counter
     noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group   
+    CHOICE_LEDS_COMBO |= CHOICE_YELLOW;
     CHOICE = CHOICE_YELLOW; 
     //return(CHOICE_YELLOW);
   }
@@ -655,7 +639,8 @@ byte checkButton_trampoline(void)
   if((T_boolean[1] == 1) && (HIGH_COUNTER_GREEN < 6)) HIGH_COUNTER_GREEN++;
   if((T_boolean[2] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
   if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
-  
+
+  setLEDs(CHOICE_LEDS_COMBO);
   return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
 
@@ -749,6 +734,7 @@ void play_loser(void)
 // Show an "attract mode" display while waiting for user to press button.
 void attractMode(void)
 {
+  Serial.println("Attract Mode");
   long counter = 0;
   //if(trampoline) attract_mode_speed *= 10;
   long start_time = millis();
@@ -758,8 +744,10 @@ void attractMode(void)
     else{
       if(trampoline)
       {
-        //if (checkButton_trampoline() != CHOICE_NONE) return;
-        checkButton_trampoline();
+        //if (checkButton_trampoline() > 0) return;
+        //Serial.println(checkButton_trampoline());
+        if(check_mode_buttons() == true) return;
+        //Serial.println(check_mode_buttons());
         if((millis() - start_time) == 1000) setLEDs(CHOICE_RED);
         else if((millis() - start_time) == 2000) setLEDs(CHOICE_BLUE);
         else if((millis() - start_time) == 3000) 
@@ -810,5 +798,56 @@ void light_test(void)
   digitalWrite(A4, LOW);
   digitalWrite(A5, LOW);
   delay(1000);
+}
+
+boolean check_mode_buttons()
+{
+  mode_ADC_reading = analogRead(A7);
+  if(mode_ADC_reading > 1000) return false; // no button being pressed
+  else
+  {
+    set_mode();
+    return true;
+  }
+}
+
+void set_mode(void)
+{
+    if(mode_ADC_reading < (button_value[0] + 10))
+    {
+      gameMode = MODE_MEMORY;
+      Serial.println("MEMORY");
+      
+    }
+    
+    if(mode_ADC_reading < (button_value[1] + 10))
+    {
+      gameMode = MODE_WACK_A_MOLE;
+      Serial.println("WACK-A-MOLE");
+    }
+    
+    if(mode_ADC_reading < (button_value[2] + 10))
+    {
+      gameMode = MODE_MUSICAL_INST;
+      Serial.println("FREE JUMP");
+    }
+}
+
+void mode_button_calibration()
+{
+  Serial.println(analogRead(A7));
+  delay(50);
+  /*
+   * 
+   * These are the readings I'm seeing on my first MAIN board built up.
+   * open: 1023
+   * B1: 90
+   * B2: 168
+   * B3: 234
+   * B4: 290
+   * B5: 339
+   * B6: 381
+   * B7: 419
+   */
 }
 

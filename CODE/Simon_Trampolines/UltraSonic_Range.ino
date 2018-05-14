@@ -43,7 +43,8 @@ void ultra_sonic_test() {
 
 long readDistance(int pin)
 {
-  delay(5);
+  delay(4);
+  check_mode_buttons();
   digitalWrite(trigPin, LOW);  
   delayMicroseconds(2); 
   digitalWrite(trigPin, HIGH);
