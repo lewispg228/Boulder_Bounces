@@ -463,7 +463,7 @@ void playMoves(void)
 // Adds a new random button to the game sequence
 void add_to_moves(void)
 {
-  byte newButton = random(0, 4); //min (included), max (exluded)
+  byte newButton = random(0, 3); //min (included), max (exluded)
 
   // ensure we don't repeat a button more than two times in a row - add to the while loop below, if you want more repeats possible.
   if(gameRound > 1) // only after you make it to step 3.
@@ -475,7 +475,7 @@ void add_to_moves(void)
       // attempt 2, attempting to add in limit per button to avoid leaving one jumper out.
     while(1)
     {
-      newButton = random(0, 4);
+      newButton = random(0, 3);
       if(!((newButton == gameBoard[gameRound-1]))) // This ensures it's not going to repeat same button 3 times
       {
         // check to see if that button is already "maxed out" (aka it has been used twice already)
