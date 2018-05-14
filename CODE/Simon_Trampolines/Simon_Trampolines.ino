@@ -313,12 +313,12 @@ void loop()
       play_loser(); // Player lost, play loser tones
   }
 
-  if (gameMode == MODE_BATTLE)
-  {
-    play_battle(); // Play game until someone loses
-
-    play_loser(); // Player lost, play loser tones
-  }
+//  if (gameMode == MODE_BATTLE)
+//  {
+//    play_battle(); // Play game until someone loses
+//
+//    play_loser(); // Player lost, play loser tones
+//  }
   
   if (gameMode == MODE_COMBO_BUTTON)
   {
@@ -360,6 +360,8 @@ byte wait_for_button(byte currentMove = 0)
     byte button = checkButton();
     
     if(trampoline) button = checkButton_trampoline();
+
+    if(gameMode != MODE_MEMORY) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
 
     if (button != CHOICE_NONE)
     { 
@@ -403,7 +405,15 @@ boolean play_memory(void)
       if (choice != gameBoard[currentMove]) return false; // If the choice is incorect, player loses
     }
 
-    delay(2000); // Player was correct, delay before playing moves
+    // delay 2000 ms with polling for mode buttons, note, this used to be just a delay, but I want to be able to jump out if a mode button is pressed.
+    // delay(2000); // Player was correct, delay before playing moves
+    for(int i = 0 ; i < 2000 ; i++)
+    {
+      delay(1);
+      check_mode_buttons();
+      if(gameMode != MODE_MEMORY) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
+    }
+    
   }
 
   return true; // Player made it through all the rounds to win!
@@ -443,6 +453,7 @@ void playMoves(void)
 {
   for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++) 
   {
+    if(gameMode != MODE_MEMORY) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
     // Pete Lewis 3/2/2016, decrease playback_speed as the sequence gets longer
     // To win you get to 13, so let's shoot for 1/2 of playback speed by the time you get to 13 steps,
     // this means we need to cut 1/2 of playback speed over 13 rounds
@@ -700,36 +711,41 @@ start_note = 0; // reset to use the first 4 notes in the array - note won't chan
 // Play the loser sound/lights
 void play_loser(void)
 {
-  setLEDs(CHOICE_RED | CHOICE_GREEN);
-  talkMIDI(0xB0, 0, 0x78); //Bank select drums
-  talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
-  noteOn(0, 38, 127); // snaire
-  delay(100);
-  noteOn(0, 50, 127); // High Tom
-  noteOn(0, 72, 127); // whistle  
-//  buzz_sound(255, 1500);
+  if(gameMode == MODE_MEMORY) // only do this, if we are still in memory mode, note, we could have got here from a mode button press, and we're just switching modes, to no need to play loser.
+  {
+    setLEDs(CHOICE_RED | CHOICE_GREEN);
+    talkMIDI(0xB0, 0, 0x78); //Bank select drums
+    talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
+    noteOn(0, 38, 127); // snaire
+    delay(100);
+    noteOn(0, 50, 127); // High Tom
+    noteOn(0, 72, 127); // whistle  
+  //  buzz_sound(255, 1500);
+    
+    setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
+    noteOn(0, 38, 127); // snaire
+    delay(100);  
+    noteOn(0, 45, 127); // Low Tom
+  //  buzz_sound(255, 1500);
   
-  setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
-  noteOn(0, 38, 127); // snaire
-  delay(100);  
-  noteOn(0, 45, 127); // Low Tom
-//  buzz_sound(255, 1500);
-
-  setLEDs(CHOICE_RED | CHOICE_GREEN);
-  noteOn(0, 38, 127); // snaire
-  delay(100);  
-  noteOn(0, 50, 127); // High Tom  
-//  buzz_sound(255, 1500);
-
-  setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
-  noteOn(0, 38, 127); // snaire
-  delay(100);  
-  noteOn(0, 45, 127); // Low Tom  
-  noteOn(0, 49, 127); // crash
-  noteOn(0, 86, 127); // kick
-  noteOn(0, 38, 127); // snaire
-  noteOn(0, 58, 127); // clacker 
-//  buzz_sound(255, 1500);
+    setLEDs(CHOICE_RED | CHOICE_GREEN);
+    noteOn(0, 38, 127); // snaire
+    delay(100);  
+    noteOn(0, 50, 127); // High Tom  
+  //  buzz_sound(255, 1500);
+  
+    setLEDs(CHOICE_BLUE | CHOICE_YELLOW);
+    noteOn(0, 38, 127); // snaire
+    delay(100);  
+    noteOn(0, 45, 127); // Low Tom  
+    noteOn(0, 49, 127); // crash
+    noteOn(0, 86, 127); // kick
+    noteOn(0, 38, 127); // snaire
+    noteOn(0, 58, 127); // clacker 
+  //  buzz_sound(255, 1500);
+    talkMIDI(0xB0, 0, bank); //Bank select drums
+    talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
+  }
   
 }
 
@@ -816,6 +832,15 @@ boolean check_mode_buttons()
 
 void set_mode(void)
 {
+  // take some more readings and average them, to avoid false button presses.
+  // this requires that the button be held down a little more solidly
+  int total_readings = 0;
+  for (int i = 0 ; i < 10 ; i++)
+  {
+    total_readings += analogRead(A7);
+  }
+  mode_ADC_reading = (total_readings/10);
+  Serial.println(mode_ADC_reading);
     if(mode_ADC_reading < (button_value[0] + 10))
     {
       gameMode = MODE_MEMORY;
