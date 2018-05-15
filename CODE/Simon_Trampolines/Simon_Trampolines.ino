@@ -166,6 +166,9 @@ int playback_speed = PLAYBACK_SPEED; // 150 is standard, but slowing it down mak
                                       // Note, this is reset each tiem a new game starts, so it has to be an int set by a define
 int attract_mode_speed = 150;
 
+int global_static_timeout_count; // this climbs as we see no jumping at all (people have stopped jumping)
+#define GLOBAL_STATIC_TIMEOUT_LIMIT 1000 // about 10 seconds
+
 void setup()
 {
   //Setup hardware inputs/outputs. These pins are defined in the hardware_versions header file
@@ -304,6 +307,11 @@ byte wait_for_button(byte currentMove = 0, byte currentMode = MODE_MUSICAL_INST)
   while ( (millis() - startTime) < ENTRY_TIME_LIMIT) // Loop until too much time has passed
   {
     byte button = checkButton_trampoline();
+    if(gameMode == MODE_WACK_A_MOLE) 
+    {
+      startTime = millis(); // negates timeout on this while loop, timeouts in WACK_A_MOLE are handled with global_static_timeout_count (which is incremented and cleared in checkButton_Trampoline
+      if(global_static_timeout_count > GLOBAL_STATIC_TIMEOUT_LIMIT) startTime = ENTRY_TIME_LIMIT; // get us out of here
+    }
 
     if(gameMode != currentMode) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
 
@@ -598,6 +606,12 @@ byte checkButton_trampoline(void)
 //  if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
 
   if(gameMode != MODE_WACK_A_MOLE) setLEDs(CHOICE_LEDS_COMBO);
+  
+  //GLOBAL STATIC TIMEOUT STUFF ////////////////////////////////////////////
+  if((CHOICE == CHOICE_NONE) && (gameMode != MODE_MUSICAL_INST)) global_static_timeout_count++; // keep count
+  else global_static_timeout_count = 0; // reset
+  Serial.println(global_static_timeout_count);
+  
   return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
 
@@ -920,7 +934,7 @@ boolean play_wack_a_mole(void)
   Serial.print("user choice:");
   Serial.println(choice);
   
-  if (choice == 0) return false; // If wait timed out, player loses
+  //if (choice == 0) return false; // If wait timed out, player loses
   
   if (choice == newButton) 
   {
@@ -935,8 +949,10 @@ boolean play_wack_a_mole(void)
     }
     //delay(1000);    
   }
-  else 
+  else if(global_static_timeout_count > GLOBAL_STATIC_TIMEOUT_LIMIT)
   {
+    Serial.println("Global static timeout");
+    global_static_timeout_count = 0; // reset
     return false; // if incorrect, then return false and get us out of here back to the main loop.
   }
 
