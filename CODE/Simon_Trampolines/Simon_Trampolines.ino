@@ -945,7 +945,10 @@ boolean play_wack_a_mole(void)
     if(successful_wacks == 19) 
     {
       delay(500);
-      return true; // they won!!
+      win_melody(); // they won!!
+      successful_wacks = 0; // start new round
+      delay(1000);
+      //return true; // DO NOT RETURN, because we want another round to keep going.
     }
     //delay(1000);    
   }

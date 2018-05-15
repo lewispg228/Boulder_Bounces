@@ -69,6 +69,8 @@ void win_melody(){
   //digitalWrite(A3, HIGH);
   
   //bank = 0x78;// drums 
+  talkMIDI(0xB0, 0, bank); //Bank select GM
+  talkMIDI(0xC0, instrument, 0x20);
 }
 
 
