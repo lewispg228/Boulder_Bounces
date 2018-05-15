@@ -12,35 +12,6 @@ Some code and wiring inspired by http://en.wikiversity.org/wiki/User:Dstaub/robo
 */
 
 long thresh_up = 1400;
-
-void ultra_sonic_test() {
-
-//  unsigned long start = micros();
-
-  duration = readDistance(echoPin);
-  duration2 = readDistance(echoPin2);
-  duration3 = readDistance(echoPin3);
-  duration4 = readDistance(echoPin4);
-
-    Serial.print(duration);
-    Serial.print(" \t");
-    Serial.print(duration2);
-    Serial.print(" \t");
-    Serial.print(duration3);
-    Serial.print(" \t");
-    Serial.println(duration4);
-
-//    if(duration > threshold_up) arm1 = true;
-//    if(duration2 > threshold_up) arm2 = true;
-//
-//    if((duration < threshold_up) && arm1)
-//    {
-//      Serial.println("\t\t\ttrigger 1");
-//      arm1 = false;
-//    }
-    delay(40);
-}
-
 long readDistance(int pin)
 {
   delay(4);
@@ -59,7 +30,7 @@ boolean digitalReadTrampoline(int trampoline)
   if(trampoline == 1) trampoline = echoPin;
   else if(trampoline == 2) trampoline = echoPin2;
   else if(trampoline == 3) trampoline = echoPin3;
-  else if(trampoline == 4) trampoline = echoPin4;
+//  else if(trampoline == 4) trampoline = echoPin4;
   if(readDistance(trampoline) > thresh_up) return true;
   else return false;
 }
@@ -70,9 +41,9 @@ void digitalReadTrampoline_test()
     Serial.print(" \t");
     Serial.print(digitalReadTrampoline(2));
     Serial.print(" \t");
-    Serial.print(digitalReadTrampoline(3));
-    Serial.print(" \t");
-    Serial.println(digitalReadTrampoline(4));
+    Serial.println(digitalReadTrampoline(3));
+//    Serial.print(" \t");
+//    Serial.println(digitalReadTrampoline(4));
 }
 
 void read_T_distances()
@@ -80,12 +51,12 @@ void read_T_distances()
   T_distance[0] = readDistance(echoPin);
   T_distance[1] = readDistance(echoPin2);
   T_distance[2] = readDistance(echoPin3);
-  T_distance[3] = readDistance(echoPin4);
+//  T_distance[3] = readDistance(echoPin4);
 }
 
 void set_T_booleans()
 {
-  for(int i = 0 ; i < 4 ; i++)
+  for(int i = 0 ; i < 3 ; i++)
   {
     if(T_distance[i] > thresh_up) T_boolean[i] = true;
     //else if(T_distance[i] < 200) T_boolean[i] = true; // bad reading, probably still high
@@ -95,12 +66,12 @@ void set_T_booleans()
 
 void print_data()
 {
-    for(int i = 0 ; i < 4 ; i++)
+    for(int i = 0 ; i < 3 ; i++)
     {
       Serial.print(T_distance[i]); 
       Serial.print(" \t");
     }
-    for(int i = 0 ; i < 4 ; i++)
+    for(int i = 0 ; i < 3 ; i++)
     {
       if(T_boolean[i]) Serial.print(T_boolean[i]);
       else Serial.print(" "); // visually, this is easy to see a space, than a "0"
@@ -112,8 +83,8 @@ void print_data()
     Serial.print(" \t");
     Serial.print(HIGH_COUNTER_BLUE);
     Serial.print(" \t");
-    Serial.print(HIGH_COUNTER_YELLOW);
-    Serial.print(" \t");
+//    Serial.print(HIGH_COUNTER_YELLOW);
+//    Serial.print(" \t");
     
     Serial.println();
 }

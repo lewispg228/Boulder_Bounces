@@ -96,11 +96,7 @@ boolean trampoline = true; // this changes the delay before start game to 1 sec
                            // in order for the flag servors to settle.
                            // Also effects the button sensing to not require a release, 
                            // this helps when transitioning or "walking" from tramp to tramp.
-
-boolean real_time_mode_input = false; // if true, it will look for a specific position on a potentiometer on A5
-                            // At every exit of attract(), it will check the potentiometer position and
-                            // go to that mode of the game.
-                            
+  
 // FOUR variables to keep track of each trampoline status.
 // To register a true jump on a trampoline, 
 // we are looking for when the trampoline changes from HIGH (not standing on it) to LOW (standing on it)
@@ -116,6 +112,8 @@ boolean real_time_mode_input = false; // if true, it will look for a specific po
 
 long T_distance[4] = {0,0,0,0};
 boolean T_boolean[4] = {0,0,0,0};
+
+bool attract_mode_bool = true;
 
 // 3/2/2016, initiating all of these to 0, so that you can start a round standing on one trampoline, or any combo.
 
@@ -143,10 +141,7 @@ int YELLOW_seq_count = 0;
 int mode_ADC_reading;
 int button_value[7] = {90, 168, 234, 290, 339, 381, 419};
 
-long duration, duration2, duration3, duration4;
-
-boolean arm1, arm2, arm3, arm4;
-int threshold_up = 1000;
+long threshold_up = 1000;
 
 // EXT MIDI TRIG STUFF
 // This is used to trigger the Music Instrument Shield
@@ -160,11 +155,7 @@ byte bank = 0x00; //GM
 byte resetMIDI = 7; //Tied to VS1053 Reset line
 int notes[] = { // fun notes found in the drum bank. grouped in 4.
   70,72,74,75,
-  //60,61,62,63, // 62 and 63 are sub sonic for most speakers, so changing them - PGL 3/2/2016
-  60,61,76,77,
-  78,79,80,81,
-  86,57,38,51,
-  56,58,71,74}; // Note, if you add more 4-note-groups, you must update variable at game start below
+}; // Note, if you add more 4-note-groups, you must update variable at game start below
 int start_note = -4; // start note, so we can quickly go to different groups in the array
                     // add 4 to this and you can skip to next 4-note-group
                     // 3/2/2016 PGL, changing this to "-4", so that we start at the beginning of array when we add 4 the first time.
@@ -201,84 +192,32 @@ void setup()
     Serial.begin(115200);
     Serial.println("Simon Says Debug ON"); 
   }
-  
-//      while(1){ // FOR DEBUG ONLY - CALIBRATING POTENTIOMETER INPUT
-//    int input = analogRead(A5);
-//    Serial.print("input=");
-//    Serial.println(input);
-//    delay(250);
-//    }
-    
-    
-  
-//  //Mode checking
-//
-//  // Check to see if the lower right button is pressed
-//  if (checkButton() == CHOICE_YELLOW) play_beegees();
-//
-//  // Check to see if upper right button is pressed
-//  else if (checkButton() == CHOICE_GREEN)
-//  {
-//    gameMode = MODE_BATTLE; //Put game into battle mode
-//
-//    //Turn on the upper right (green) LED
-//    setLEDs(CHOICE_GREEN);
-//    toner(CHOICE_GREEN, 150);
-//
-//    setLEDs(CHOICE_RED | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
-//
-//    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
-//    
-//    if(debug) Serial.println("Battle Mode entered"); 
-//
-//    //Now do nothing. Battle mode will be serviced in the main routine
-//  }
-//
-//  // Check to see if upper left button is pressed
-//  else if (checkButton() == CHOICE_RED)
-//  {
-//    gameMode = MODE_COMBO_BUTTON; //Put game into combo button mode
-//
-//    //Turn on the RED LED
-//    setLEDs(CHOICE_RED);
-//    toner(CHOICE_RED, 150);
-//
-//    setLEDs(CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW); // Turn on the other LEDs until you release button
-//
-//    while(checkButton() != CHOICE_NONE) ; // Wait for user to stop pressing button
-//    
-//    if(debug) Serial.println("Combo Button Mode entered"); 
-//    
-//    //Now do nothing. Combo button mode will be serviced in the main routine
-//  }
-  
-  
+
   // midi setup
-  if(midi){
-      //Setup soft serial for MIDI control
+  if(midi)
+  {
+    //Setup soft serial for MIDI control
     mySerial.begin(31250);
-  
     //Reset the VS1053
     pinMode(resetMIDI, OUTPUT);
     digitalWrite(resetMIDI, LOW);
     delay(100);
     digitalWrite(resetMIDI, HIGH);
     delay(100);
-  
     newGameMelody();
-    //bank = 0x78;// drums 
   }
-  
-//  play_winner(); // After setup is complete, say hello to the world
 
 //while(1) play_musical_inst();
 //while(1) light_test();
 //while(1) mode_button_calibration();
+//while(1) if(Serial.available() > 0) exe_serial_command();
+
+
 }
 
 void loop()
 {
-  attractMode(); // Blink lights while waiting for user to press a button
+  //attractMode(); // Blink lights while waiting for user to press a button
   playback_speed = PLAYBACK_SPEED;
   RED_seq_count = 0;
   GREEN_seq_count = 0;
@@ -286,8 +225,11 @@ void loop()
   YELLOW_seq_count = 0;
 
   // Indicate the start of game play
+  //while(check_mode_buttons() == false); // wait for a button press
+
+  
   newGameMelody(); // indicate new game starting via melodic sound
-  setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW); // Turn all LEDs on
+  setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE); // Turn all LEDs on
   delay(1000);
   setLEDs(CHOICE_OFF); // Turn off LEDs
   if(trampoline) delay(1000);
@@ -306,30 +248,16 @@ void loop()
   {
     Serial.println("--->>> Memory Mode");
     // Play memory game and handle result
-    if (play_memory() == true){
-      win_melody(); // midi sounds
-//      play_winner(); // Player won, play winner tones
+    if (play_memory() == true) 
+    {
+      win_melody();
     }
     else 
+    {
       play_loser(); // Player lost, play loser tones
-  }
-
-//  if (gameMode == MODE_BATTLE)
-//  {
-//    play_battle(); // Play game until someone loses
-//
-//    play_loser(); // Player lost, play loser tones
-//  }
-  
-  if (gameMode == MODE_COMBO_BUTTON)
-  {
-    // Play memory game in combo mode and handle result
-    if (play_memory_combo() == true){
-//      play_winner(); // Player won, play winner tones
-      win_melody(); // midi sounds
     }
-    else 
-      play_loser(); // Player lost, play loser tones
+    gameMode = MODE_MUSICAL_INST;
+    delay(1000);
   }
   
   if (gameMode == MODE_MUSICAL_INST)
@@ -338,6 +266,21 @@ void loop()
     play_musical_inst(); // Play musical inst until a timeout occurs (3 seconds)
   }
   
+  if (gameMode == MODE_WACK_A_MOLE)
+  {
+    Serial.println("--->>> WACK A MOLE Mode");
+    if (play_wack_a_mole() == true)
+    {
+      win_melody();
+    }
+    else
+    {
+      play_loser(); // Player lost, play loser tones    
+    }
+    gameMode = MODE_MUSICAL_INST;
+    delay(1000);  
+  }  
+  
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -345,7 +288,7 @@ void loop()
 
 // Wait for a button to be pressed. 
 // Returns one of LED colors (LED_RED, etc.) if successful, 0 if timed out
-byte wait_for_button(byte currentMove = 0)
+byte wait_for_button(byte currentMove = 0, byte currentMode = MODE_MUSICAL_INST)
 {
   long startTime = millis(); // Remember the time we started the this loop
 
@@ -362,17 +305,33 @@ byte wait_for_button(byte currentMove = 0)
     
     if(trampoline) button = checkButton_trampoline();
 
-    if(gameMode != MODE_MEMORY) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
+    if(gameMode != currentMode) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
 
     if (button != CHOICE_NONE)
     { 
-      toner(button, 150); // Play the button the user just pressed
+      if(currentMode != MODE_WACK_A_MOLE) toner(button, 150); // Play the button the user just pressed, works for memory game, but not for wack a mole
       
       if(trampoline == false) while(checkButton() != CHOICE_NONE) ;  // Now let's wait for user to release button, works fine in standard playing with buttons.
       
-      delay(250); // This helps with debouncing and accidental double taps
+      //delay(250); // This helps with debouncing and accidental double taps
 
-      return button;
+      if(currentMode != MODE_WACK_A_MOLE) return button; // as it originally was, works for memory game, but not for wack a mole
+      else
+      {
+        // this means we are in WACK_A_MOLE, and we want to allow the players to jump wrong trampolines, they can just keep jumping until timeout, or they get the correct trampoline
+        if(currentMove == button) 
+        {
+          talkMIDI(0xB0, 0, 0x78); //Bank select drums
+          talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
+          noteOn(0, 65, 127); // play low "hit a mole sound"
+          delay(100);
+          talkMIDI(0xB0, 0, bank); //Bank select GM
+          talkMIDI(0xC0, instrument, 0x20);
+          return button; // in wack a mole, I am sending in currentMove so I can know what I'm looking for as a correct jump
+                          // if it's correct, then return it, if not, then do nothing and let timeout take us out
+        }      
+                                                
+      }
     }
 
   }
@@ -399,7 +358,7 @@ boolean play_memory(void)
     for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++)
     {
       
-      byte choice = wait_for_button(); // See what button the user presses
+      byte choice = wait_for_button(0, MODE_MEMORY); // See what button the user presses
       
       if (choice == 0) return false; // If wait timed out, player loses
 
@@ -430,13 +389,13 @@ boolean play_battle(void)
   
   while (1) // Loop until someone fails 
   {
-    byte newButton = wait_for_button(); // Wait for user to input next move
+    byte newButton = wait_for_button(0, MODE_BATTLE); // Wait for user to input next move
     gameBoard[gameRound++] = newButton; // Add this new button to the game array
 
     // Then require the player to repeat the sequence.
     for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++)
     {
-      byte choice = wait_for_button();
+      byte choice = wait_for_button(0, MODE_BATTLE);
 
       if (choice == 0) return false; // If wait timed out, player loses.
 
@@ -562,27 +521,11 @@ void setLEDs(byte leds)
 
 void play_musical_inst(void)
 {
-   long startTime = millis(); // Remember the time we started the this loop
-
-  while ( ((millis() - startTime) < ENTRY_TIME_LIMIT) && (gameMode == MODE_MUSICAL_INST)) // Loop until too much time has passed , or we switched modes, note, MODE can change every time we call readDistance() - which happens a ton all the time!!!
+  Serial.println("--FREE JUMP--");
+  while (gameMode == MODE_MUSICAL_INST) // Loop until we switched modes (happens in checkButton_Trampoline, MODE can change every time we call readDistance() - which happens a ton all the time!!!
   {
-    byte button = checkButton_trampoline(); // alwasy do trampoline, even if playing with buttons
-                                            // This allows us to press the next sound without releasing
-                                            // the previous button.
-                                            // This makes it more like a traditional keyboard.
-//Serial.println(button, DEC);                                            
-
-    if (button != CHOICE_NONE)
-    { 
-      // don't need to call TONER() because midi notes are played during checkButton_trampoline()
-      // toner(button, 1); // Play the button the user just pressed
-      
-      //delay(10); // This helps with debouncing and accidental double taps
-
-      startTime = millis();
-    }
+    checkButton_trampoline();
   }
-// If we get here, we've timed out!
 }
 
 // Returns a '1' bit in the position corresponding to CHOICE_RED, CHOICE_GREEN, etc.
@@ -613,7 +556,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
-    noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
+    if(gameMode != MODE_WACK_A_MOLE) noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
     CHOICE_LEDS_COMBO |= CHOICE_RED;
     CHOICE = CHOICE_RED;
     //return(CHOICE_RED);
@@ -623,7 +566,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[1] == 0) && (HIGH_COUNTER_GREEN > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_GREEN = 0; // reset counter
-    noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group    
+    if(gameMode != MODE_WACK_A_MOLE) noteOn(0, notes[start_note+1], 127); // start_note+1 to get the next spot in 4-note-group    
     CHOICE_LEDS_COMBO |= CHOICE_GREEN;
     CHOICE = CHOICE_GREEN;
     //return(CHOICE_GREEN);
@@ -633,28 +576,28 @@ byte checkButton_trampoline(void)
   if ((T_boolean[2] == 0) && (HIGH_COUNTER_BLUE > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_BLUE = 0; // reset counter
-    noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group    
+    if(gameMode != MODE_WACK_A_MOLE) noteOn(0, notes[start_note+2], 127); // start_note+2 to get the next spot in 4-note-group    
     CHOICE_LEDS_COMBO |= CHOICE_BLUE;
     CHOICE = CHOICE_BLUE;
    // return(CHOICE_BLUE);
   }
 
-  /////////////////YELLOW
-  if ((T_boolean[3] == 0) && (HIGH_COUNTER_YELLOW > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
-  {
-    HIGH_COUNTER_YELLOW = 0; // reset counter
-    noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group   
-    CHOICE_LEDS_COMBO |= CHOICE_YELLOW;
-    CHOICE = CHOICE_YELLOW; 
-    //return(CHOICE_YELLOW);
-  }
+//  /////////////////YELLOW
+//  if ((T_boolean[3] == 0) && (HIGH_COUNTER_YELLOW > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
+//  {
+//    HIGH_COUNTER_YELLOW = 0; // reset counter
+//    noteOn(0, notes[start_note+3], 127); // start_note+3 to get the next spot in 4-note-group   
+//    CHOICE_LEDS_COMBO |= CHOICE_YELLOW;
+//    CHOICE = CHOICE_YELLOW; 
+//    //return(CHOICE_YELLOW);
+//  }
   
   if((T_boolean[0] == 1) && (HIGH_COUNTER_RED < 6)) HIGH_COUNTER_RED++;
   if((T_boolean[1] == 1) && (HIGH_COUNTER_GREEN < 6)) HIGH_COUNTER_GREEN++;
   if((T_boolean[2] == 1) && (HIGH_COUNTER_BLUE < 6)) HIGH_COUNTER_BLUE++;
-  if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
+//  if((T_boolean[3] == 1) && (HIGH_COUNTER_YELLOW < 6)) HIGH_COUNTER_YELLOW++;
 
-  setLEDs(CHOICE_LEDS_COMBO);
+  if(gameMode != MODE_WACK_A_MOLE) setLEDs(CHOICE_LEDS_COMBO);
   return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
 
@@ -712,7 +655,7 @@ start_note = 0; // reset to use the first 4 notes in the array - note won't chan
 // Play the loser sound/lights
 void play_loser(void)
 {
-  if(gameMode == MODE_MEMORY) // only do this, if we are still in memory mode, note, we could have got here from a mode button press, and we're just switching modes, to no need to play loser.
+  if((gameMode == MODE_MEMORY) || (gameMode == MODE_WACK_A_MOLE)) // only do this, if we are still in memory mode, note, we could have got here from a mode button press, and we're just switching modes, to no need to play loser.
   {
     setLEDs(CHOICE_RED | CHOICE_GREEN);
     talkMIDI(0xB0, 0, 0x78); //Bank select drums
@@ -744,10 +687,9 @@ void play_loser(void)
     noteOn(0, 38, 127); // snaire
     noteOn(0, 58, 127); // clacker 
   //  buzz_sound(255, 1500);
-    talkMIDI(0xB0, 0, bank); //Bank select drums
+    talkMIDI(0xB0, 0, bank); //Bank select GM
     talkMIDI(0xC0, instrument, 0x20); //Set instrument number. 0xC0 is a 1 data byte command
   }
-  
 }
 
 // Show an "attract mode" display while waiting for user to press button.
@@ -756,24 +698,43 @@ void attractMode(void)
   Serial.println("Attract Mode");
   long counter = 0;
   //if(trampoline) attract_mode_speed *= 10;
-  long start_time = millis();
-  while(1) 
+  long attract_start_time = millis();
+  long attract_timeout = millis(); // this will be used to go back to FREE JUMP if left in some other mode (and attract) for too long.
+  attract_mode_bool = true;
+  while(attract_mode_bool) 
   {
     if(Serial.available()) exe_serial_command();
     else{
       if(trampoline)
       {
-        //if (checkButton_trampoline() > 0) return;
+
         //Serial.println(checkButton_trampoline());
         if(check_mode_buttons() == true) return;
+        if((gameMode != MODE_MUSICAL_INST) && ((millis() - attract_timeout) == 10000))
+        {
+          Serial.println("attract_mode_timeout - switching to musical instrument mode");
+          gameMode = MODE_MUSICAL_INST;
+          attract_mode_bool = false;
+        }
         //Serial.println(check_mode_buttons());
-        if((millis() - start_time) == 1000) setLEDs(CHOICE_RED);
-        else if((millis() - start_time) == 2000) setLEDs(CHOICE_BLUE);
-        else if((millis() - start_time) == 3000) 
+        if((millis() - attract_start_time) == 1000) setLEDs(CHOICE_RED);
+        else if((millis() - attract_start_time) == 2000) setLEDs(CHOICE_BLUE);
+        else if((millis() - attract_start_time) == 3000) 
         {
           setLEDs(CHOICE_GREEN);
-          start_time = millis(); // reset timer
+          attract_start_time = millis(); // reset timer
         }
+        
+//        if(checkButton_trampoline() != CHOICE_NONE) 
+//        {
+//          Serial.println("not choice_none");
+//          attract_mode_bool = false;
+//          return;
+//        }
+//        else 
+//        {
+//          Serial.println("choice_none");
+//        }
       }
       else{
         setLEDs(CHOICE_RED);
@@ -822,7 +783,7 @@ void light_test(void)
 boolean check_mode_buttons()
 {
   mode_ADC_reading = analogRead(A7);
-  if(mode_ADC_reading > 1000) return false; // no button being pressed
+  if(mode_ADC_reading > 900) return false; // no button being pressed
   else
   {
     Serial.println(mode_ADC_reading);
@@ -880,5 +841,111 @@ void mode_button_calibration()
    * B6: 381
    * B7: 419
    */
+}
+
+// Play the Wack a Mole game
+// Returns 0 if player loses, or 1 if player wins
+boolean play_wack_a_mole(void)
+{
+  delay(1000);
+  Serial.println("Wack-a-mole starting now...");
+  delay(1000);
+  // choose a random trampoline
+  // light up the LED - keep it on.
+  // listen for the player to jump on that trampoline
+  // once they jump on that trampoline, turn off the LED and play the wack sound (low pitched tone).
+  // if the player does not hit the correct trampoline, timeout to play loser(), then go to free jump.
+  // keep a count of successful wacks, if they get to 10, then play winner, then go back to free jump.
+
+  start_note = 0; // reset to use the first 4 notes in the array - note won't change at MOB installation
+
+  randomSeed(millis()); // Seed the random generator with random amount of millis()
+
+  byte successful_wacks = 0; // Reset the game to the beginning
+  byte previous_button = 0; // to avoid too many repeats
+  byte newButton = 0; // start here, then we randomly go in either direction.
+  while (successful_wacks < 10) 
+  {
+    byte addition = random(1,3); //min (included), max (exluded)
+    if(addition == 1) // I'm gonna add
+    {
+      if((newButton == 0) || (newButton == 1)) newButton++;
+      else 
+      {
+        newButton = 0;
+      }
+    }
+    if(addition == 2) // I'm gonna subtract
+    {
+      if((newButton == 1) || (newButton == 2)) newButton--;
+      else 
+      {
+        newButton = 2;      
+      }
+    }
+
+  // We have to convert this number, 0 to 3, to CHOICEs
+  if(newButton == 0) 
+  {
+    newButton = CHOICE_RED;
+    noteOn(0, notes[start_note], 127); // start note, so we can quickly go to different groups in the array
+    setLEDs(CHOICE_RED);
+    RED_seq_count++;
+  }
+  else if(newButton == 1) 
+  {
+    newButton = CHOICE_GREEN;
+    noteOn(0, notes[start_note+1], 127); // start note, so we can quickly go to different groups in the array 
+    setLEDs(CHOICE_GREEN);   
+    GREEN_seq_count++;
+  }
+  else if(newButton == 2) 
+  {
+    newButton = CHOICE_BLUE;
+    noteOn(0, notes[start_note+2], 127); // start note, so we can quickly go to different groups in the array   
+    setLEDs(CHOICE_BLUE); 
+    BLUE_seq_count++;
+  }
+
+  Serial.print("Wack chosen:");
+  Serial.println(newButton);
+  //delay(1000);
+  // Then require the player to repeat the chosen bounce.
+  byte choice = wait_for_button(newButton, MODE_WACK_A_MOLE); // See what button the user presses, send it currentMove (correct), so I can wait for that
+
+  Serial.print("user choice:");
+  Serial.println(choice);
+  
+  if (choice == 0) return false; // If wait timed out, player loses
+  
+  if (choice == newButton) 
+  {
+    setLEDs(CHOICE_NONE);
+    successful_wacks++; // If the choice is correct, increment successful wacks and let this while loop continue gameplay
+    Serial.print("successful wacks:");
+    Serial.println(successful_wacks);
+    if(successful_wacks == 9) 
+    {
+      delay(500);
+      return true; // they won!!
+    }
+    //delay(1000);    
+  }
+  else 
+  {
+    return false; // if incorrect, then return false and get us out of here back to the main loop.
+  }
+
+    // delay 2000 ms with polling for mode buttons, note, this used to be just a delay, but I want to be able to jump out if a mode button is pressed.
+    // delay(2000); // Player was correct, delay a random amount before showing next mole
+    int wait_time = random(500,2000);
+    for(int i = 0 ; i < wait_time ; i++)
+    {
+      delay(1);
+      check_mode_buttons();
+      if(gameMode != MODE_WACK_A_MOLE) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
+    }
+    previous_button = newButton; // to avoid a repeat.
+  }
 }
 
