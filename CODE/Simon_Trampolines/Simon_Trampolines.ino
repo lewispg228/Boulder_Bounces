@@ -864,7 +864,7 @@ boolean play_wack_a_mole(void)
   byte successful_wacks = 0; // Reset the game to the beginning
   byte previous_button = 0; // to avoid too many repeats
   byte newButton = 0; // start here, then we randomly go in either direction.
-  while (successful_wacks < 10) 
+  while (successful_wacks < 20) 
   {
     // try and make the sequences a little less repeatative
     RED_seq_count = 0;
@@ -928,7 +928,7 @@ boolean play_wack_a_mole(void)
     successful_wacks++; // If the choice is correct, increment successful wacks and let this while loop continue gameplay
     Serial.print("successful wacks:");
     Serial.println(successful_wacks);
-    if(successful_wacks == 9) 
+    if(successful_wacks == 19) 
     {
       delay(500);
       return true; // they won!!
