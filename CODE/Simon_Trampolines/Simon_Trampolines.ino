@@ -254,7 +254,7 @@ void loop()
     }
     else 
     {
-      play_loser(); // Player lost, play loser tones
+      if(gameMode == MODE_MEMORY) play_loser(); // Player lost, play loser tones
     }
     gameMode = MODE_MUSICAL_INST;
     delay(1000);
@@ -275,7 +275,7 @@ void loop()
     }
     else
     {
-      play_loser(); // Player lost, play loser tones    
+      if(gameMode == MODE_WACK_A_MOLE) play_loser(); // Player lost, play loser tones    
     }
     gameMode = MODE_MUSICAL_INST;
     delay(1000);  
@@ -847,7 +847,7 @@ void mode_button_calibration()
 // Returns 0 if player loses, or 1 if player wins
 boolean play_wack_a_mole(void)
 {
-  delay(1000);
+  newGameMelody();
   Serial.println("Wack-a-mole starting now...");
   delay(1000);
   // choose a random trampoline
@@ -866,23 +866,27 @@ boolean play_wack_a_mole(void)
   byte newButton = 0; // start here, then we randomly go in either direction.
   while (successful_wacks < 10) 
   {
-    byte addition = random(1,3); //min (included), max (exluded)
-    if(addition == 1) // I'm gonna add
+    // try and make the sequences a little less repeatative
+    RED_seq_count = 0;
+    GREEN_seq_count = 0;
+    BLUE_seq_count = 0;
+    while(1)
     {
-      if((newButton == 0) || (newButton == 1)) newButton++;
-      else 
+      newButton = random(0, 3);
+      if(newButton != previous_button) // This ensures it's not going to repeat same button 3 times
       {
-        newButton = 0;
-      }
+        // check to see if that button is already "maxed out" (aka it has been used twice already)
+        if((newButton == 0) && (RED_seq_count == 4)); // do nothing
+        else if((newButton == 1) && (GREEN_seq_count == 3)); // do nothing
+        else if((newButton == 2) && (BLUE_seq_count == 3)); // do nothing
+        else break; // get out of this while loop and continue playing. This means that the new button is good to go. 
+      }    
     }
-    if(addition == 2) // I'm gonna subtract
-    {
-      if((newButton == 1) || (newButton == 2)) newButton--;
-      else 
-      {
-        newButton = 2;      
-      }
-    }
+      Serial.print("previous_button:");
+      Serial.println(previous_button);
+      Serial.print("newButton:");
+      Serial.println(newButton);
+      previous_button = newButton; // to keep track of this thing
 
   // We have to convert this number, 0 to 3, to CHOICEs
   if(newButton == 0) 
@@ -938,14 +942,13 @@ boolean play_wack_a_mole(void)
 
     // delay 2000 ms with polling for mode buttons, note, this used to be just a delay, but I want to be able to jump out if a mode button is pressed.
     // delay(2000); // Player was correct, delay a random amount before showing next mole
-    int wait_time = random(500,2000);
+    int wait_time = random(250,1000);
     for(int i = 0 ; i < wait_time ; i++)
     {
       delay(1);
       check_mode_buttons();
       if(gameMode != MODE_WACK_A_MOLE) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
     }
-    previous_button = newButton; // to avoid a repeat.
   }
 }
 
