@@ -618,7 +618,7 @@ byte checkButton_trampoline(void)
   //GLOBAL STATIC TIMEOUT STUFF ////////////////////////////////////////////
   if((CHOICE == CHOICE_NONE) && (gameMode != MODE_MUSICAL_INST)) global_static_timeout_count++; // keep count
   else global_static_timeout_count = 0; // reset
-  Serial.println(global_static_timeout_count);
+  //Serial.println(global_static_timeout_count);
   
   return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
@@ -886,7 +886,7 @@ boolean play_wack_a_mole(void)
   byte successful_wacks = 0; // Reset the game to the beginning
   byte previous_button = 0; // to avoid too many repeats
   byte newButton = 0; // start here, then we randomly go in either direction.
-  while (successful_wacks < 20) 
+  while ((successful_wacks < 20) && (gameMode == MODE_WACK_A_MOLE)) 
   {
     // try and make the sequences a little less repeatative
     RED_seq_count = 0;
@@ -964,6 +964,7 @@ boolean play_wack_a_mole(void)
   {
     Serial.println("Global static timeout");
     global_static_timeout_count = 0; // reset
+    gameMode = MODE_MUSICAL_INST;
     return false; // if incorrect, then return false and get us out of here back to the main loop.
   }
 
