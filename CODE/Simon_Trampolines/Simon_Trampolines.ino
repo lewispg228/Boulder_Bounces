@@ -275,7 +275,9 @@ void loop()
     }
     else
     {
-      if(gameMode == MODE_WACK_A_MOLE) play_loser(); // Player lost, play loser tones    
+      // NO LOSER SOUNDS IN WACK_A_MOLE
+      // If we got here, that means that it timed out (no jumping at all for 10 seconds)
+      //if(gameMode == MODE_WACK_A_MOLE) play_loser(); // Player lost, play loser tones ***Keeping for reference***
     }
     gameMode = MODE_MUSICAL_INST;
     delay(1000);  
@@ -301,9 +303,7 @@ byte wait_for_button(byte currentMove = 0, byte currentMode = MODE_MUSICAL_INST)
 
   while ( (millis() - startTime) < ENTRY_TIME_LIMIT) // Loop until too much time has passed
   {
-    byte button = checkButton();
-    
-    if(trampoline) button = checkButton_trampoline();
+    byte button = checkButton_trampoline();
 
     if(gameMode != currentMode) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
 
