@@ -567,7 +567,7 @@ byte checkButton_trampoline(void)
   //digitalReadTrampoline_test();
   read_T_distances();
   set_T_booleans();
-  //print_data();
+  print_data();
   /////////////////RED
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
