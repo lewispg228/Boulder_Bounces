@@ -259,7 +259,7 @@ void loop()
     {
       if(gameMode == MODE_MEMORY) play_loser(); // Player lost, play loser tones
     }
-    gameMode = MODE_MUSICAL_INST;
+    //gameMode = MODE_MUSICAL_INST; // DO NOT change mode, so we get another round (unless global timeout happens)
     delay(1000);
   }
   
@@ -284,6 +284,14 @@ void loop()
     }
     gameMode = MODE_MUSICAL_INST;
     delay(1000);  
+  }
+  
+  if(global_static_timeout_count > GLOBAL_STATIC_TIMEOUT_LIMIT)
+  {
+    Serial.println("Global static timeout");
+    global_static_timeout_count = 0; // reset
+    gameMode = MODE_MUSICAL_INST;
+    delay(1000);
   }  
   
 }
