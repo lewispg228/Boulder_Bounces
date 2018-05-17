@@ -49,14 +49,14 @@ void digitalReadTrampoline_test()
 void read_T_distances()
 {
   T_distance[0] = readDistance(echoPin);
-  T_distance[1] = readDistance(echoPin2);
-  T_distance[2] = readDistance(echoPin3);
+//  T_distance[1] = readDistance(echoPin2);
+//  T_distance[2] = readDistance(echoPin3);
 //  T_distance[3] = readDistance(echoPin4);
 }
 
 void set_T_booleans()
 {
-  for(int i = 0 ; i < 3 ; i++)
+  for(int i = 0 ; i < 1 ; i++)
   {
     if(T_distance[i] > thresh_up) T_boolean[i] = true;
     //else if(T_distance[i] < 200) T_boolean[i] = true; // bad reading, probably still high
@@ -66,12 +66,12 @@ void set_T_booleans()
 
 void print_data()
 {
-    for(int i = 0 ; i < 3 ; i++)
+    for(int i = 0 ; i < 1 ; i++)
     {
       Serial.print(T_distance[i]); 
       Serial.print(" \t");
     }
-    for(int i = 0 ; i < 3 ; i++)
+    for(int i = 0 ; i < 1 ; i++)
     {
       if(T_boolean[i]) Serial.print(T_boolean[i]);
       else Serial.print(" "); // visually, this is easy to see a space, than a "0"
@@ -79,10 +79,10 @@ void print_data()
     }    
     Serial.print(HIGH_COUNTER_RED);
     Serial.print(" \t");
-    Serial.print(HIGH_COUNTER_GREEN);
-    Serial.print(" \t");
-    Serial.print(HIGH_COUNTER_BLUE);
-    Serial.print(" \t");
+//    Serial.print(HIGH_COUNTER_GREEN);
+//    Serial.print(" \t");
+//    Serial.print(HIGH_COUNTER_BLUE);
+//    Serial.print(" \t");
 //    Serial.print(HIGH_COUNTER_YELLOW);
 //    Serial.print(" \t");
     
