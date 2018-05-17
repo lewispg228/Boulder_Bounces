@@ -42,24 +42,46 @@
 
  */
 
+
+   /*
+ Controlling large 7-segment displays
+ By: Nathan Seidle
+ SparkFun Electronics
+ Date: February 25th, 2015
+ License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+
+ This code demonstrates how to post two numbers to a 2-digit display usings two large digit driver boards.
+
+ Here's how to hook up the Arduino pins to the Large Digit Driver IN
+
+ Arduino pin 6 -> CLK (Green on the 6-pin cable)
+ 5 -> LAT (Blue)
+ 7 -> SER on the IN side (Yellow)
+ 5V -> 5V (Orange)
+ Power Arduino with 12V and connect to Vin -> 12V (Red)
+ GND -> GND (Black)
+
+ There are two connectors on the Large Digit Driver. 'IN' is the input side that should be connected to
+ your microcontroller (the Arduino). 'OUT' is the output side that should be connected to the 'IN' of addtional
+ digits.
+
+ Each display will use about 150mA with all segments and decimal point on.
+
+*/
+
+
+
+
 #include "hardware_versions.h"
 
-#define MODE_JUNGLE  0
-#define MODE_CARTOON  1
-#define MODE_BIRD 2
-#define MODE_OCEAN 3
-#define MODE_FARM 4
-#define MODE_COLORADO 5
+#define MODE_DUCK  0
+#define MODE_DRUMS  1
 
-#define JUNGLE_TRACKS 8
-#define CARTOON_TRACKS 10
-#define BIRD_TRACKS 10
-#define OCEAN_TRACKS 10
-#define FARM_TRACKS 6
-#define COLORADO_TRACKS 8 // note these are ducks right now
+#define DUCK_TRACKS 6
+#define DRUMS_TRACKS 10
 
 // Game state variables
-byte gameMode = MODE_JUNGLE;
+byte gameMode = MODE_DUCK;
 
 // TRAMPOLINE EXTENTION STUFF
   
@@ -96,9 +118,12 @@ int HIGH_COUNTER_YELLOW = 0;
 int mode_ADC_reading;
 int button_value[7] = {90, 168, 234, 290, 339, 381, 419};
 
+byte bounceCount = 0;
+boolean bounceCount_active = false;
+
 long threshold_up = 1000;
 
-int group_start_track = 10;
+int group_start_track = 70; // start on ducks - if no button is pressed on a hard micro reset
 int group_tracks = 6;
 int delay_ms_tsunami_com = 100;
 
@@ -110,10 +135,26 @@ Tsunami tsunami;                // Our Tsunami object
 int global_static_timeout_count; // this climbs as we see no jumping at all (people have stopped jumping)
 #define GLOBAL_STATIC_TIMEOUT_LIMIT 3000 // about 10 seconds
 
+
+//GPIO declarations
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+byte segmentClock = 6;
+byte segmentLatch = 5;
+byte segmentData = 7;
+
+
 void setup()
 {
   //Setup hardware inputs/outputs. These pins are defined in the hardware_versions header file
 
+  pinMode(segmentClock, OUTPUT);
+  pinMode(segmentData, OUTPUT);
+  pinMode(segmentLatch, OUTPUT);
+
+  digitalWrite(segmentClock, LOW);
+  digitalWrite(segmentData, LOW);
+  digitalWrite(segmentLatch, LOW);
+  
   // ULTRA_SONIC RANGE FINDER SETUP STUFF
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -141,6 +182,9 @@ void setup()
   tsunami.masterGain(0, 0);              // Reset the master gain to 0dB
   delay(delay_ms_tsunami_com);  
   test_audio_playback();
+
+  clear_display();
+  delay(1000);
 }
 
 void loop()
@@ -151,7 +195,10 @@ void loop()
   {
     Serial.println("Global static timeout");
     global_static_timeout_count = 0; // reset
-    gameMode = MODE_JUNGLE;
+    bounceCount = 0; // reset
+    bounceCount_active = false;
+    clear_display();
+    gameMode = MODE_DUCK;
     delay(1000);
   }  
 }
@@ -163,7 +210,6 @@ void loop()
 byte checkButton_trampoline(void)
 {
   byte CHOICE = CHOICE_NONE; // if nothing is pressed
-  byte start_note = 0; 
   //ultra_sonic_test();
   //digitalReadTrampoline_test();
   read_T_distances();
@@ -175,7 +221,12 @@ byte checkButton_trampoline(void)
     HIGH_COUNTER_RED = 0; // reset counter
     play_track(group_start_track + random(0, (group_tracks+1)));
     CHOICE = CHOICE_RED;
-    //return(CHOICE_RED);
+    if(bounceCount_active == true)
+    {
+      bounceCount++;
+      showNumber(bounceCount);
+      Serial.println(bounceCount);      
+    }
   }
   
   if((T_boolean[0] == 1) && (HIGH_COUNTER_RED < 6)) HIGH_COUNTER_RED++;
@@ -183,7 +234,7 @@ byte checkButton_trampoline(void)
   //GLOBAL STATIC TIMEOUT STUFF ////////////////////////////////////////////
   if(CHOICE == CHOICE_NONE) global_static_timeout_count++; // keep count
   else global_static_timeout_count = 0; // reset
-  Serial.println(global_static_timeout_count);
+  //Serial.println(global_static_timeout_count);
   
   return(CHOICE); // If no button is pressed, this will be default CHOICE_NONE, but if something is pressed, then it will be set in the IFs above.
 }
@@ -207,57 +258,31 @@ boolean check_mode_buttons()
     Serial.println(mode_ADC_reading);
       if((mode_ADC_reading > (button_value[0] - 5)) && (mode_ADC_reading < (button_value[0] + 5)))
       {
-        gameMode = MODE_JUNGLE;
-        Serial.println("JUNGLE");
-        group_start_track = 10;
-        group_tracks = JUNGLE_TRACKS;
-        return true;
-      }
-      
-      else if((mode_ADC_reading > (button_value[1] - 5)) && (mode_ADC_reading < (button_value[1] + 5)))
-      {
-        gameMode = MODE_CARTOON;
-        Serial.println("CARTOON");
-        group_start_track = 20;
-        group_tracks = CARTOON_TRACKS;        
+        gameMode = MODE_DUCK;
+        Serial.println("DUCK");
+        group_start_track = 70;
+        group_tracks = DUCK_TRACKS;
         return true;
       }
       
       else if((mode_ADC_reading > (button_value[2] - 5)) && (mode_ADC_reading < (button_value[2] + 5)))
       {
-        gameMode = MODE_BIRD;
-        Serial.println("BIRD");
-        group_start_track = 30;
-        group_tracks = BIRD_TRACKS;        
+        gameMode = MODE_DRUMS;
+        Serial.println("DRUMS");
+        group_start_track = 20;
+        group_tracks = DRUMS_TRACKS;        
         return true;
       }
 
-      else if((mode_ADC_reading > (button_value[3] - 5)) && (mode_ADC_reading < (button_value[3] + 5)))
-      {
-        gameMode = MODE_OCEAN;
-        Serial.println("OCEAN");
-        group_start_track = 40;
-        group_tracks = OCEAN_TRACKS;        
-        return true;
-      }      
-
       else if((mode_ADC_reading > (button_value[4] - 5)) && (mode_ADC_reading < (button_value[4] + 5)))
       {
-        gameMode = MODE_FARM;
-        Serial.println("FARM");
-        group_start_track = 50;
-        group_tracks = FARM_TRACKS;        
+        Serial.println("BOUNCE_COUNT_RESET");
+        bounceCount = 0;     
+        bounceCount_active = true;
+        showNumber(bounceCount);
         return true;
-      }            
-
-      else if((mode_ADC_reading > (button_value[5] - 5)) && (mode_ADC_reading < (button_value[5] + 5)))
-      {
-        gameMode = MODE_COLORADO;
-        Serial.println("COLORADO");
-        group_start_track = 70;
-        group_tracks = COLORADO_TRACKS;        
-        return true;
-      }               
+      }      
+                   
       else
       {
         Serial.println("BAD VALUE");
@@ -307,4 +332,102 @@ void play_track(int track)
     delay(delay_ms_tsunami_com);
 }
 
+
+//Takes a number and displays 2 numbers. Displays absolute value (no negatives)
+void showNumber(float value)
+{
+  int number = abs(value); //Remove negative signs and any decimals
+
+  //Serial.print("number: ");
+  //Serial.println(number);
+
+  for (byte x = 0 ; x < 2 ; x++)
+  {
+    int remainder = number % 10;
+
+    postNumber(remainder, false);
+
+    number /= 10;
+  }
+
+  //Latch the current segment data
+  digitalWrite(segmentLatch, LOW);
+  digitalWrite(segmentLatch, HIGH); //Register moves storage register on the rising edge of RCK
+}
+
+//Given a number, or '-', shifts it out to the display
+void postNumber(byte number, boolean decimal)
+{
+  //    -  A
+  //   / / F/B
+  //    -  G
+  //   / / E/C
+  //    -. D/DP
+
+#define a  1<<0
+#define b  1<<6
+#define c  1<<5
+#define d  1<<4
+#define e  1<<3
+#define f  1<<1
+#define g  1<<2
+#define dp 1<<7
+
+  byte segments;
+
+  switch (number)
+  {
+    case 1: segments = b | c; break;
+    case 2: segments = a | b | d | e | g; break;
+    case 3: segments = a | b | c | d | g; break;
+    case 4: segments = f | g | b | c; break;
+    case 5: segments = a | f | g | c | d; break;
+    case 6: segments = a | f | g | e | c | d; break;
+    case 7: segments = a | b | c; break;
+    case 8: segments = a | b | c | d | e | f | g; break;
+    case 9: segments = a | b | c | d | f | g; break;
+    case 0: segments = a | b | c | d | e | f; break;
+    case 10: segments = 0; break;
+    case 'c': segments = g | e | d; break;
+    case '-': segments = g; break;
+  }
+
+  if (decimal) segments |= dp;
+
+  //Clock these bits out to the drivers
+  for (byte x = 0 ; x < 8 ; x++)
+  {
+    digitalWrite(segmentClock, LOW);
+    digitalWrite(segmentData, segments & 1 << (7 - x));
+    digitalWrite(segmentClock, HIGH); //Data transfers to the register on the rising edge of SRCK
+  }
+}
+
+void clear_display(void)
+{
+  
+    //Clock these bits out to the drivers
+  for (byte x = 0 ; x < 8 ; x++)
+  {
+    digitalWrite(segmentClock, LOW);
+    digitalWrite(segmentData, LOW);
+    digitalWrite(segmentClock, HIGH); //Data transfers to the register on the rising edge of SRCK
+  }
+
+  //Latch the current segment data
+  digitalWrite(segmentLatch, LOW);
+  digitalWrite(segmentLatch, HIGH); //Register moves storage register on the rising edge of RCK
+
+    //Clock these bits out to the drivers
+  for (byte x = 0 ; x < 8 ; x++)
+  {
+    digitalWrite(segmentClock, LOW);
+    digitalWrite(segmentData, LOW);
+    digitalWrite(segmentClock, HIGH); //Data transfers to the register on the rising edge of SRCK
+  }
+
+  //Latch the current segment data
+  digitalWrite(segmentLatch, LOW);
+  digitalWrite(segmentLatch, HIGH); //Register moves storage register on the rising edge of RCK  
+}
 
