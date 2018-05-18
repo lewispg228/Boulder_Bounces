@@ -56,7 +56,7 @@
 #define BIRD_TRACKS 10
 #define OCEAN_TRACKS 10
 #define FARM_TRACKS 6
-#define COLORADO_TRACKS 8 // note these are ducks right now
+#define COLORADO_TRACKS 7
 
 // Game state variables
 byte gameMode = MODE_JUNGLE;
@@ -270,7 +270,7 @@ boolean check_mode_buttons()
       {
         gameMode = MODE_COLORADO;
         Serial.println("COLORADO");
-        group_start_track = 70;
+        group_start_track = 80;
         group_tracks = COLORADO_TRACKS; 
         set_button_leds();       
         return true;
