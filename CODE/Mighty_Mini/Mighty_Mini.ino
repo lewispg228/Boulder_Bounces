@@ -230,7 +230,7 @@ byte checkButton_trampoline(void)
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
     HIGH_COUNTER_RED = 0; // reset counter
-    play_track(group_start_track + random(0, (group_tracks+1)));
+    play_track(group_start_track + random(0, (group_tracks)));
     CHOICE = CHOICE_RED;
     if(bounceCount_active == true)
     {
