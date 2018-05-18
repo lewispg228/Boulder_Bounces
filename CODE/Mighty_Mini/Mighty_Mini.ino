@@ -83,6 +83,8 @@
 // Game state variables
 byte gameMode = MODE_DUCK;
 
+int button_leds[] = {13,10}; // 1 and 3
+
 // TRAMPOLINE EXTENTION STUFF
   
 // FOUR variables to keep track of each trampoline status.
@@ -147,6 +149,13 @@ void setup()
 {
   //Setup hardware inputs/outputs. These pins are defined in the hardware_versions header file
 
+  // button LEDs aka mode leds
+  for(int i = 0 ; i < 2 ; i++ )
+  {
+    pinMode(button_leds[i], OUTPUT);
+    digitalWrite(button_leds[i], LOW);
+  }
+
   pinMode(segmentClock, OUTPUT);
   pinMode(segmentData, OUTPUT);
   pinMode(segmentLatch, OUTPUT);
@@ -185,6 +194,7 @@ void setup()
 
   clear_display();
   delay(1000);
+  set_button_leds();
 }
 
 void loop()
@@ -199,6 +209,7 @@ void loop()
     bounceCount_active = false;
     clear_display();
     gameMode = MODE_DUCK;
+    set_button_leds();
     delay(1000);
   }  
 }
@@ -262,6 +273,7 @@ boolean check_mode_buttons()
         Serial.println("DUCK");
         group_start_track = 70;
         group_tracks = DUCK_TRACKS;
+        set_button_leds();
         return true;
       }
       
@@ -270,7 +282,8 @@ boolean check_mode_buttons()
         gameMode = MODE_DRUMS;
         Serial.println("DRUMS");
         group_start_track = 20;
-        group_tracks = DRUMS_TRACKS;        
+        group_tracks = DRUMS_TRACKS;     
+        set_button_leds();   
         return true;
       }
 
@@ -429,5 +442,20 @@ void clear_display(void)
   //Latch the current segment data
   digitalWrite(segmentLatch, LOW);
   digitalWrite(segmentLatch, HIGH); //Register moves storage register on the rising edge of RCK  
+}
+
+
+void set_button_leds(void)
+{
+  int select;
+  for(int i = 0 ; i < 2 ; i++ ) 
+  {
+    digitalWrite(button_leds[i], LOW);
+  }
+  
+  if(gameMode == MODE_DUCK) select = 0;
+  else if(gameMode == MODE_DRUMS) select = 1;
+  
+  digitalWrite(button_leds[select], HIGH);
 }
 
