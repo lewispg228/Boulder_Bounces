@@ -83,6 +83,8 @@ int MAX_seq_repeat = 2; // Max sequence repeat. Used to ensure variety in patter
 #define MODE_MUSICAL_INST 4
 #define MODE_WACK_A_MOLE 5
 
+int button_leds[] = {13,9,10};
+
 #define NUM_OF_TRAMPOLINES 3
 
 // Game state variables
@@ -179,6 +181,13 @@ void setup()
 //  pinMode(BUTTON_BLUE, INPUT_PULLUP);
 //  pinMode(BUTTON_YELLOW, INPUT_PULLUP);
 
+// button LEDs aka mode leds
+for(int i = 0 ; i < 3 ; i++ )
+{
+  pinMode(button_leds[i], OUTPUT);
+  digitalWrite(button_leds[i], LOW);
+}
+
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
@@ -250,6 +259,7 @@ void loop()
   if (gameMode == MODE_MEMORY)
   {
     Serial.println("--->>> Memory Mode");
+    set_button_leds();
     // Play memory game and handle result
     if (play_memory() == true) 
     {
@@ -266,12 +276,14 @@ void loop()
   if (gameMode == MODE_MUSICAL_INST)
   {
     Serial.println("--->>> Free Jump Mode");
+    set_button_leds();
     play_musical_inst(); // Play musical inst until a timeout occurs (3 seconds)
   }
   
   if (gameMode == MODE_WACK_A_MOLE)
   {
     Serial.println("--->>> WACK A MOLE Mode");
+    set_button_leds();
     if (play_wack_a_mole() == true)
     {
       win_melody();
@@ -291,6 +303,7 @@ void loop()
     Serial.println("Global static timeout");
     global_static_timeout_count = 0; // reset
     gameMode = MODE_MUSICAL_INST;
+    set_button_leds();
     delay(1000);
   }  
   
@@ -823,6 +836,7 @@ boolean check_mode_buttons()
       {
         gameMode = MODE_MEMORY;
         Serial.println("MEMORY");
+        set_button_leds();
         return true;
       }
       
@@ -830,6 +844,7 @@ boolean check_mode_buttons()
       {
         gameMode = MODE_WACK_A_MOLE;
         Serial.println("WACK-A-MOLE");
+        set_button_leds();
         return true;
       }
       
@@ -837,6 +852,7 @@ boolean check_mode_buttons()
       {
         gameMode = MODE_MUSICAL_INST;
         Serial.println("FREE JUMP");
+        set_button_leds();
         return true;
       }
       else
@@ -965,6 +981,7 @@ boolean play_wack_a_mole(void)
     Serial.println("Global static timeout");
     global_static_timeout_count = 0; // reset
     gameMode = MODE_MUSICAL_INST;
+    set_button_leds();
     return false; // if incorrect, then return false and get us out of here back to the main loop.
   }
 
@@ -978,5 +995,20 @@ boolean play_wack_a_mole(void)
       if(gameMode != MODE_WACK_A_MOLE) break; // this means that a mode button was pressed and it's time to break out of here. (this global variable is changed every time we read a trampoline - a lot!
     }
   }
+}
+
+void set_button_leds(void)
+{
+  int select;
+  for(int i = 0 ; i < 3 ; i++ ) 
+  {
+    digitalWrite(button_leds[i], LOW);
+  }
+  
+  if(gameMode == MODE_MEMORY) select = 0;
+  else if(gameMode == MODE_WACK_A_MOLE) select = 1;
+  else if(gameMode == MODE_MUSICAL_INST) select = 2;
+  
+  digitalWrite(button_leds[select], HIGH);
 }
 
