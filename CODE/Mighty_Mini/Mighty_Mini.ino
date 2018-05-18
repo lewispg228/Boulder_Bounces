@@ -77,7 +77,7 @@
 #define MODE_DUCK  0
 #define MODE_DRUMS  1
 
-#define DUCK_TRACKS 6
+#define DUCK_TRACKS 8
 #define DRUMS_TRACKS 10
 
 // Game state variables
@@ -281,7 +281,7 @@ boolean check_mode_buttons()
       {
         gameMode = MODE_DRUMS;
         Serial.println("DRUMS");
-        group_start_track = 20;
+        group_start_track = 60;
         group_tracks = DRUMS_TRACKS;     
         set_button_leds();   
         return true;
