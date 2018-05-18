@@ -60,6 +60,7 @@
 
 // Game state variables
 byte gameMode = MODE_JUNGLE;
+int button_leds[] = {13,7,10,11,5,6};
 
 // TRAMPOLINE EXTENTION STUFF
   
@@ -94,7 +95,7 @@ int HIGH_COUNTER_YELLOW = 0;
 #define echoPin4 8
 
 int mode_ADC_reading;
-int button_value[7] = {90, 168, 234, 290, 339, 381, 419};
+int button_value[7] = {90, 168, 234, 290, 339, 390, 419};
 
 long threshold_up = 1000;
 
@@ -114,6 +115,13 @@ void setup()
 {
   //Setup hardware inputs/outputs. These pins are defined in the hardware_versions header file
 
+  // button LEDs aka mode leds
+  for(int i = 0 ; i < 6 ; i++ )
+  {
+    pinMode(button_leds[i], OUTPUT);
+    digitalWrite(button_leds[i], LOW);
+  }
+  
   // ULTRA_SONIC RANGE FINDER SETUP STUFF
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -141,6 +149,8 @@ void setup()
   tsunami.masterGain(0, 0);              // Reset the master gain to 0dB
   delay(delay_ms_tsunami_com);  
   test_audio_playback();
+
+  set_button_leds();
 }
 
 void loop()
@@ -152,6 +162,7 @@ void loop()
     Serial.println("Global static timeout");
     global_static_timeout_count = 0; // reset
     gameMode = MODE_JUNGLE;
+    set_button_leds();
     delay(1000);
   }  
 }
@@ -211,6 +222,7 @@ boolean check_mode_buttons()
         Serial.println("JUNGLE");
         group_start_track = 10;
         group_tracks = JUNGLE_TRACKS;
+        set_button_leds();
         return true;
       }
       
@@ -219,7 +231,8 @@ boolean check_mode_buttons()
         gameMode = MODE_CARTOON;
         Serial.println("CARTOON");
         group_start_track = 20;
-        group_tracks = CARTOON_TRACKS;        
+        group_tracks = CARTOON_TRACKS;
+        set_button_leds();        
         return true;
       }
       
@@ -228,7 +241,8 @@ boolean check_mode_buttons()
         gameMode = MODE_BIRD;
         Serial.println("BIRD");
         group_start_track = 30;
-        group_tracks = BIRD_TRACKS;        
+        group_tracks = BIRD_TRACKS; 
+        set_button_leds();       
         return true;
       }
 
@@ -237,7 +251,8 @@ boolean check_mode_buttons()
         gameMode = MODE_OCEAN;
         Serial.println("OCEAN");
         group_start_track = 40;
-        group_tracks = OCEAN_TRACKS;        
+        group_tracks = OCEAN_TRACKS;   
+        set_button_leds();     
         return true;
       }      
 
@@ -246,7 +261,8 @@ boolean check_mode_buttons()
         gameMode = MODE_FARM;
         Serial.println("FARM");
         group_start_track = 50;
-        group_tracks = FARM_TRACKS;        
+        group_tracks = FARM_TRACKS;     
+        set_button_leds();   
         return true;
       }            
 
@@ -255,7 +271,8 @@ boolean check_mode_buttons()
         gameMode = MODE_COLORADO;
         Serial.println("COLORADO");
         group_start_track = 70;
-        group_tracks = COLORADO_TRACKS;        
+        group_tracks = COLORADO_TRACKS; 
+        set_button_leds();       
         return true;
       }               
       else
@@ -307,4 +324,21 @@ void play_track(int track)
     delay(delay_ms_tsunami_com);
 }
 
+void set_button_leds(void)
+{
+  int select;
+  for(int i = 0 ; i < 6 ; i++ ) 
+  {
+    digitalWrite(button_leds[i], LOW);
+  }
+  
+  if(gameMode == MODE_JUNGLE) select = 0;
+  else if(gameMode == MODE_CARTOON) select = 1;
+  else if(gameMode == MODE_BIRD) select = 2;
+  else if(gameMode == MODE_OCEAN) select = 3;
+  else if(gameMode == MODE_FARM) select = 4;
+  else if(gameMode == MODE_COLORADO) select = 5;
+  
+  digitalWrite(button_leds[select], HIGH);
+}
 
