@@ -96,6 +96,7 @@ int HIGH_COUNTER_YELLOW = 0;
 
 int mode_ADC_reading;
 int button_value[7] = {90, 168, 234, 290, 339, 390, 419};
+int window_tolerance = 10;
 
 long threshold_up = 1000;
 
@@ -216,7 +217,7 @@ boolean check_mode_buttons()
     }
     mode_ADC_reading = (total_readings/10);
     Serial.println(mode_ADC_reading);
-      if((mode_ADC_reading > (button_value[0] - 5)) && (mode_ADC_reading < (button_value[0] + 5)))
+      if((mode_ADC_reading > (button_value[0] - window_tolerance)) && (mode_ADC_reading < (button_value[0] + window_tolerance)))
       {
         gameMode = MODE_JUNGLE;
         Serial.println("JUNGLE");
@@ -226,7 +227,7 @@ boolean check_mode_buttons()
         return true;
       }
       
-      else if((mode_ADC_reading > (button_value[1] - 5)) && (mode_ADC_reading < (button_value[1] + 5)))
+      else if((mode_ADC_reading > (button_value[1] - window_tolerance)) && (mode_ADC_reading < (button_value[1] + window_tolerance)))
       {
         gameMode = MODE_CARTOON;
         Serial.println("CARTOON");
@@ -236,7 +237,7 @@ boolean check_mode_buttons()
         return true;
       }
       
-      else if((mode_ADC_reading > (button_value[2] - 5)) && (mode_ADC_reading < (button_value[2] + 5)))
+      else if((mode_ADC_reading > (button_value[2] - window_tolerance)) && (mode_ADC_reading < (button_value[2] + window_tolerance)))
       {
         gameMode = MODE_BIRD;
         Serial.println("BIRD");
@@ -246,7 +247,7 @@ boolean check_mode_buttons()
         return true;
       }
 
-      else if((mode_ADC_reading > (button_value[3] - 5)) && (mode_ADC_reading < (button_value[3] + 5)))
+      else if((mode_ADC_reading > (button_value[3] - window_tolerance)) && (mode_ADC_reading < (button_value[3] + window_tolerance)))
       {
         gameMode = MODE_OCEAN;
         Serial.println("OCEAN");
@@ -256,7 +257,7 @@ boolean check_mode_buttons()
         return true;
       }      
 
-      else if((mode_ADC_reading > (button_value[4] - 5)) && (mode_ADC_reading < (button_value[4] + 5)))
+      else if((mode_ADC_reading > (button_value[4] - window_tolerance)) && (mode_ADC_reading < (button_value[4] + window_tolerance)))
       {
         gameMode = MODE_FARM;
         Serial.println("FARM");
@@ -266,7 +267,7 @@ boolean check_mode_buttons()
         return true;
       }            
 
-      else if((mode_ADC_reading > (button_value[5] - 5)) && (mode_ADC_reading < (button_value[5] + 5)))
+      else if((mode_ADC_reading > (button_value[5] - window_tolerance)) && (mode_ADC_reading < (button_value[5] + window_tolerance)))
       {
         gameMode = MODE_COLORADO;
         Serial.println("COLORADO");

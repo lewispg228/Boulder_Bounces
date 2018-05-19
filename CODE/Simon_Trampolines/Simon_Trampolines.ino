@@ -143,7 +143,7 @@ int YELLOW_seq_count = 0;
 int mode_ADC_reading;
 int button_value[7] = {90, 168, 234, 290, 339, 381, 419};
 
-long threshold_up = 1000;
+//long threshold_up = 1000;
 
 // EXT MIDI TRIG STUFF
 // This is used to trigger the Music Instrument Shield
@@ -580,7 +580,7 @@ byte checkButton_trampoline(void)
   //digitalReadTrampoline_test();
   read_T_distances();
   set_T_booleans();
-  //print_data();
+  print_data();
   /////////////////RED
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
