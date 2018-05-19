@@ -11,7 +11,7 @@ Original code improvements to the Ping sketch sourced from Trollmaker.com
 Some code and wiring inspired by http://en.wikiversity.org/wiki/User:Dstaub/robotcar
 */
 
-long thresh_up = 1400;
+long thresh_up = 1500;
 long readDistance(int pin)
 {
   delay(4);
