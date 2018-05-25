@@ -1,2 +1,4 @@
-# Simon_Says_Jump
-Like the classic "Simon Says" 4-button memory game, but on trampolines. Wahoo!!
+# Boulder Bounces
+Like the classic "Simon Says" memory game, but on trampolines. Wahoo!!
+
+Also the "Mighty Mini" and "Hop & Hear"
