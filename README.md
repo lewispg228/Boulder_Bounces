@@ -17,27 +17,19 @@ https://www.museumofboulder.org
 
 SparkFun products used in this project:
 
-Arduino Pro Mini 328 - 5V/16MHz
-https://www.sparkfun.com/products/11113
+[Arduino Pro Mini 328 - 5V/16MHz](https://www.sparkfun.com/products/11113)
 
-Ultrasonic Sensor - HC-SR04
-https://www.sparkfun.com/products/13959
+[Ultrasonic Sensor - HC-SR04](https://www.sparkfun.com/products/13959)
 
-Tsunami Super WAV Trigger
-https://www.sparkfun.com/products/13810
+[Tsunami Super WAV Trigger](https://www.sparkfun.com/products/13810)
 
-SparkFun Beefcake Relay Control Kit (Ver. 2.0)
-https://www.sparkfun.com/products/13815
+[SparkFun Beefcake Relay Control Kit Ver. 2.0](https://www.sparkfun.com/products/13815)
 
-SparkFun Music Instrument Shield
-https://www.sparkfun.com/products/10587
+[SparkFun Music Instrument Shield](https://www.sparkfun.com/products/10587)
 
-7-Segment Display - 6.5" (Red)
-https://www.sparkfun.com/products/8530
+[7-Segment Display - 6.5" (Red)](https://www.sparkfun.com/products/8530)
 
-SparkFun Large Digit Driver
-https://www.sparkfun.com/products/13279
+[SparkFun Large Digit Driver](https://www.sparkfun.com/products/13279)
 
-SparkFun Noisy Cricket Stereo Amplifier - 1.5W
-https://www.sparkfun.com/products/14475
+[SparkFun Noisy Cricket Stereo Amplifier - 1.5W](https://www.sparkfun.com/products/14475)
 
