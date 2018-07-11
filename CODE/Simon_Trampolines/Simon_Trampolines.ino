@@ -1153,3 +1153,32 @@ void clear_gameBoard(void)
   }
 }
 
+void set_new_sequence(int select)
+{
+  const byte sequenceOne[] =    {0,1,2,2,1,0,1,2};
+  const byte sequenceTwo[] =    {1,0,2,2,1,0,1,2};
+  const byte sequenceThree[] =  {0,1,2,2,1,0,1,2};
+  const byte sequenceFour[] =   {1,2,0,2,1,0,1,2};
+  const byte sequenceFive[] =   {2,1,0,2,1,0,1,2};
+  const byte sequenceSix[] =    {2,0,1,2,1,0,1,2};
+  const byte sequenceSeven[] =  {0,1,2,2,1,0,1,2};
+  const byte sequenceEight[] =  {0,1,2,2,1,0,1,2};
+  const byte sequenceNine[] =   {0,1,2,2,1,0,1,2};
+  const byte sequenceTen[] =    {0,1,2,2,1,0,1,2};
+  switch (select) 
+  {
+    case 0:
+      Serial.println("dark");
+      break;
+    case 1:    // your hand is close to the sensor
+      Serial.println("dim");
+      break;
+    case 2:    // your hand is a few inches from the sensor
+      Serial.println("medium");
+      break;
+    case 3:    // your hand is nowhere near the sensor
+      Serial.println("bright");
+      break;
+  }  
+}
+
