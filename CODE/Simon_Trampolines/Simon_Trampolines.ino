@@ -267,7 +267,11 @@ void loop()
     }
     else 
     {
-      if(gameMode == MODE_MEMORY) play_loser(); // Player lost, play loser tones
+      if(gameMode == MODE_MEMORY) 
+      {
+        clear_gameBoard();
+        play_loser(); // Player lost, play loser tones
+      }
     }
     //gameMode = MODE_MUSICAL_INST; // DO NOT change mode, so we get another round (unless global timeout happens)
     delay(1000);
@@ -380,7 +384,9 @@ boolean play_memory(void)
   while (gameRound < ROUNDS_TO_WIN) 
   {
     add_to_moves(); // Add a button to the current moves, then play them back
-
+    
+    if(debug) print_gameboard();
+    
     playMoves(); // Play back the current game board
 
     // Then require the player to repeat the sequence.
@@ -464,9 +470,62 @@ void playMoves(void)
 void add_to_moves(void)
 {
   byte newButton = random(0, 3); //min (included), max (exluded)
-
-  // ensure we don't repeat a button more than two times in a row - add to the while loop below, if you want more repeats possible.
-  if(gameRound > 1) // only after you make it to step 3.
+  int add_to_moves_counter = 0; // keep track of our while loop below for finding good new buttons, and see if this is jamming the game.
+  if(gameRound == 0); // do nothing - newButton is randomly set above.
+  else if((gameRound == 1) || (gameRound == 2)) // jumps 2 and 3 are important. for the first 3 jumps we want these to always hit each tramp once
+  {
+    while(1)
+    {
+      add_to_moves_counter++; // keep track of how many times we are trying to find a good new button to use (random might be stalling out here)
+      int on_deck_buttons[2] = {0,0}; // these are used to help reandomize below
+      newButton = random(0, 3); // pull in a first attempt at a nice new random button
+      if((newButton == 0) && (RED_seq_count > 0))
+      {
+        on_deck_buttons[0] = 1;
+        on_deck_buttons[1] = 2;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;
+      }
+      else if((newButton == 1) && (GREEN_seq_count > 0))
+      {
+        on_deck_buttons[0] = 0;
+        on_deck_buttons[1] = 2;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;
+      }
+      else if((newButton == 2) && (BLUE_seq_count > 0))
+      {
+        on_deck_buttons[0] = 0;
+        on_deck_buttons[1] = 1;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;        
+      }
+      //else if((newButton == 3) && (YELLOW_seq_count == 2)); // do nothing
+      //else break; // get out of this while loop and continue playing. This means that the new button is good to go. 
+      else
+      {
+        Serial.println("error");
+        break;
+      }
+      if(debug) Serial.println("add_to_moves attempting...");
+      if(debug) Serial.print("gameBoard[gameRound-1]:");
+      if(debug) Serial.println(gameBoard[gameRound-1]);
+      if(debug) Serial.print("gameBoard[gameRound-2]:");
+      if(debug) Serial.println(gameBoard[gameRound-2]);      
+    }
+    if(debug)
+    {
+      Serial.print("add_to_moves_counter: ");
+      Serial.println(add_to_moves_counter);
+      Serial.print("RED_seq_count: ");
+      Serial.println(RED_seq_count);
+      Serial.print("GREEN_seq_count: ");
+      Serial.println(GREEN_seq_count);
+      Serial.print("BLUE_seq_count: ");
+      Serial.println(BLUE_seq_count);
+    }
+  }  
+  else // only after you make it to step 3.
   {
       // attempt 1, works.
       // while((newButton == gameBoard[gameRound-1]) && (newButton == gameBoard[gameRound-2])) newButton = random(0, 4); // keep pulling in more variables until this isn't true.
@@ -475,16 +534,58 @@ void add_to_moves(void)
       // attempt 2, attempting to add in limit per button to avoid leaving one jumper out.
     while(1)
     {
-      newButton = random(0, 3);
-      if(!((newButton == gameBoard[gameRound-1]))) // This ensures it's not going to repeat same button 3 times
+      add_to_moves_counter++; // keep track of how many times we are trying to find a good new button to use (random might be stalling out here)
+      int on_deck_buttons[2] = {0,0}; // these are used to help reandomize below
+      newButton = random(0, 3); // pull in a first attempt at a nice new random button
+      
+      // This ensures it's not going to repeat same button 3 times
+      //if((convert_to_choice_byte(newButton) == gameBoard[gameRound-1]) && (convert_to_choice_byte(newButton) == gameBoard[gameRound-2])); // do nothing, try again 
+      // check to see if that button is already "maxed out" (aka it has been used twice already)
+      
+      if((newButton == 0) && (RED_seq_count == 2))
       {
-        // check to see if that button is already "maxed out" (aka it has been used twice already)
-        if((newButton == 0) && (RED_seq_count == 2)); // do nothing
-        else if((newButton == 1) && (GREEN_seq_count == 3)); // do nothing
-        else if((newButton == 2) && (BLUE_seq_count == 3)); // do nothing
-        //else if((newButton == 3) && (YELLOW_seq_count == 2)); // do nothing
-        else break; // get out of this while loop and continue playing. This means that the new button is good to go. 
-      }    
+        on_deck_buttons[0] = 1;
+        on_deck_buttons[1] = 2;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;
+      }
+      else if((newButton == 1) && (GREEN_seq_count == 3))
+      {
+        on_deck_buttons[0] = 0;
+        on_deck_buttons[1] = 2;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;
+      }
+      else if((newButton == 2) && (BLUE_seq_count == 3))
+      {
+        on_deck_buttons[0] = 0;
+        on_deck_buttons[1] = 1;
+        newButton = on_deck_buttons[random(0, 2)]; // chooose randomly from on_deck_buttons - aka the only ones we want to choose from
+        break;        
+      }
+      //else if((newButton == 3) && (YELLOW_seq_count == 2)); // do nothing
+      //else break; // get out of this while loop and continue playing. This means that the new button is good to go. 
+      else
+      {
+        Serial.println("error");
+        break;
+      }
+      if(debug) Serial.println("add_to_moves attempting...");
+      if(debug) Serial.print("gameBoard[gameRound-1]:");
+      if(debug) Serial.println(gameBoard[gameRound-1]);
+      if(debug) Serial.print("gameBoard[gameRound-2]:");
+      if(debug) Serial.println(gameBoard[gameRound-2]);      
+    }
+    if(debug)
+    {
+      Serial.print("add_to_moves_counter: ");
+      Serial.println(add_to_moves_counter);
+      Serial.print("RED_seq_count: ");
+      Serial.println(RED_seq_count);
+      Serial.print("GREEN_seq_count: ");
+      Serial.println(GREEN_seq_count);
+      Serial.print("BLUE_seq_count: ");
+      Serial.println(BLUE_seq_count);
     }
   }
   
@@ -580,7 +681,7 @@ byte checkButton_trampoline(void)
   //digitalReadTrampoline_test();
   read_T_distances();
   set_T_booleans();
-  print_data();
+  //print_data();
   /////////////////RED
   if ((T_boolean[0] == 0) && (HIGH_COUNTER_RED > 5)) // if FLAG_RED is set to true, that means that it has been release at some point previously.
   {
@@ -1010,5 +1111,45 @@ void set_button_leds(void)
   else if(gameMode == MODE_MUSICAL_INST) select = 2;
   
   digitalWrite(button_leds[select], HIGH);
+}
+
+void print_gameboard(void)
+{
+  Serial.print("current gameboard: ");
+  for(int i ; i < ROUNDS_TO_WIN ; i++)
+  {
+     Serial.print(gameBoard[i]);
+     Serial.print(", ");
+  }
+  Serial.println(" ");
+}
+
+byte convert_to_choice_byte(int button_int)
+{
+  // We have to convert this number, 0 to 3, to CHOICEs
+  if(button_int == 0) 
+  {
+    return CHOICE_RED;
+  }
+  else if(button_int == 1) 
+  {
+    return CHOICE_GREEN;
+  }
+  else if(button_int == 2) 
+  {
+    return CHOICE_BLUE;
+  }
+  else if(button_int == 3) 
+  {
+    return CHOICE_YELLOW;
+  }
+}
+
+void clear_gameBoard(void)
+{
+  for(int i ; i < ROUNDS_TO_WIN ; i++)
+  {
+     gameBoard[i] = 0;
+  }
 }
 
