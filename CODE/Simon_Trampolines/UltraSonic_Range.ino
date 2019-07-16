@@ -58,7 +58,7 @@ void set_T_booleans()
 {
   for(int i = 0 ; i < 3 ; i++)
   {
-    if((T_distance[i] == 17) || (T_distance[i] == 18)); // error in reading, do nothing
+    if(T_distance[i] < 50); // error in reading, do nothing, usually comes in as random 16, 17, or 18
     else if(T_distance[i] > thresh_up) T_boolean[i] = true;
     //else if(T_distance[i] < 200) T_boolean[i] = true; // bad reading, probably still high
     else T_boolean[i] = false;
@@ -89,4 +89,3 @@ void print_data()
     
     Serial.println();
 }
-
